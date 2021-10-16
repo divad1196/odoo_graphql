@@ -6,7 +6,7 @@ from odoo.osv.expression import AND
 
 def parse_document(env, doc):  # Un document peut avoir plusieurs définitions
     for definition in doc.definitions:
-        parse_definition(env, definition)
+        return parse_definition(env, definition)
 
 
 def parse_definition(env, d):
@@ -20,7 +20,7 @@ def parse_definition(env, d):
     #     ...
 
     data = {}
-    for field in d.d.selection_set.selections:
+    for field in d.selection_set.selections:
         name = field.name.value
         model = get_model_by_name(env, name)
         data[name] = parse_model_field(model, field)
@@ -29,7 +29,7 @@ def parse_definition(env, d):
 
 def get_model_by_name(env, name):
     # Todo
-    return "sale.order"
+    return env["sale.order"]
 
 # Nb: il y a 2 niveau de champs, les racines et ceux dessous
 # => on doit parfois récupérer un model, parfois un champs
@@ -40,15 +40,15 @@ def parse_model_field(model, field, ids=None):
             [("id", "in", ids)]
         ])
     fields = field.selection_set.selections
-    fields_names = [f.name.values for f in fields]
+    fields_names = [f.name.value for f in fields]
     relations = get_relational_fields(model, fields)
 
     records = model.search_read(domain, fields_names)
     if relations:
         for rec in records:
-            for rel, model_name, field in relations.items():
+            for rel, model_name, field in relations:
                 rec[rel] = parse_model_field(
-                    model.env[model_name], field
+                    model.env[model_name], field, ids=rec[rel],
                 )
     return records
 
@@ -67,8 +67,20 @@ def get_relational_fields(model, fields):
 # https://stackoverflow.com/questions/45674423/how-to-filter-greater-than-in-graphql
 def parse_arguments(args):  # return a domain
     # Todo: ajouter support pour d'autres valeurs, comme limit, order, ..
+    # for a in args:
+    #     breakpoint()
     args = {
-        a.name.value: a.value.value
+        a.name.value: value2py(a.value)
         for a in args
     }
     return args.get("domain", [])
+
+def value2py(value):
+    if hasattr(value, "value"):
+        return value.value
+    if hasattr(value, "values"):
+        return [
+            value2py(v)
+            for v in value.values
+        ]
+    raise Exception("Can not convert")
