@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Alpine.js</title>
+    <link
+        rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous"
+    />
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.2.3/cdn.js"
+        integrity="sha512-tdHUxNPB3/bSr3K5olp0biuy8ztGo8r1INBxtMCP4qOUzeRPuqkcebuUKthZ43WceXnNY+ATvHDWGrWqrZwJ2g=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+        defer
+    ></script>
+  </head>
+  <body>
+    <script src="graphql.js"></script> 
+    <script>
+        const url = "http://192.168.1.113:8100";
+        const odoo = odoo_builder(url, "open-net-test");
+
+        async function getTickets(variables) {
+            return odoo.graphql(`
+                query Tickets {
+                    HelpdeskTicket(domain: $domain, limit: $limit) {	
+                        name
+                        user: user_id @include(if: $user_info) {
+                            name
+                        }
+                        stage_id {
+                            name
+                        }
+                        partner_id @include(if: $partner_id)  {
+                            user_id {
+                                name
+                            }
+                        }
+                    }
+                }`,
+                Object.assign({}, {domain: [], user_info: true, partner_id: false}, variables)
+            );
+        };
+        /*
+            Examples:
+            tickets = await getTickets()
+            tickets = await getTickets({limit: 200, offset: 400, partner_id: true})
+        */
+
+
+        async function productByName(name) {
+            query = `
+                query Test {
+                    products: ProductTemplate(domain: [["name", "ilike", $name]]) {
+                        name
+                        price: list_price
+                    }
+                }
+            `
+            variables = {
+                name
+            }
+            let data = await odoo.graphql(query, variables);
+            
+            let res = data && data["products"] || [];
+            return res;
+        }
+
+        async function reloadBlogs() {
+            query = `
+                query Test {
+                    posts: BlogPost {
+                        name
+                    }
+                }
+            `
+            res = await odoo.graphql(query);
+            return res && res["posts"] || [];
+        }
+    </script>
+    <div x-data="{login: '', password: ''}">
+        <input type="text" x-model="login"/>
+        <input type="text" x-model="password"/>
+        <button @click="odoo.login(login, password)">Login</button>
+        <button @click="odoo.logout()">Log out</button>
+    </div>
+    <div x-data="{toggle: true, name: '', products: []}">
+        <h1 x-bind:class="toggle ? 'text-success' : 'text-danger'">
+            Products
+        </h1>
+        <input type="text" x-model="name" @keydown="products = await productByName(name)"/>
+        <ul>
+            <template x-for="product in products">
+                <li>
+                    <span x-text="product.name"></span><br/>
+                    Price: <span x-text="product.price"></span>
+                </li>
+            </template>
+        </ul>
+    </div>
+    <div x-data="{blogs: []}">
+        <h1>
+            Blogs
+        </h1>
+        <ul>
+            <template x-for="blog in blogs">
+                <li>
+                    <span x-text="blog.name"></span>
+                </li>
+            </template>
+        </ul>
+        <button @click="blogs = await reloadBlogs()">Reload Blogs</button>
+    </div>
+    
+
+  </body>
+  <script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('darkMode', {
+            on: false,
+
+            toggle() {
+                this.on = ! this.on
+            }
+        })
+    })
+</script>
+</html>
