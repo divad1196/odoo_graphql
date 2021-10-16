@@ -1,0 +1,94 @@
+<section class="oe_container">
+  <div class="oe_row oe_spaced">
+    <div>
+      <h1>Generic graphql implementation for Odoo</h1>
+      
+      <h3 class="oe_slogan">
+        Use all the power of Odoo in the simpliest way through <a href="https://graphql.org/">graphql</a>.
+      </h3>
+    </div>
+    <div class="row">
+      <div class="col-3">
+        <img alt="Icon" class="oe_picture" src="icon.png"/>
+      </div>
+      <div class="col-9 pt-5">
+        <p>Graphql provides a simplier and more efficient way to query data than you would currently do in Odoo (using for example xmlrpc or jsonrpc).</p>
+        <p>
+          This module adds a generic way to do graphql queries and mutations on Odoo server.<br>
+          This module takes into account any installed modules and use the Odoo permissions (Access rights and access rules).
+        </p>
+      </div>
+    </div>
+    <div>
+      <h3>Use cases</h3>
+      <ul>
+        <li>
+          Use Odoo as your centralised database for your automations.<br>
+          Odoo has the easiest backend framework to develop with, and an active and growing community<br>
+        </li>
+        <li>
+          If you want to create your own website on top of Odoo using the most modern framework as AngularJS, VueJS or ReactJs,<br>
+          This module will provide you the simpliest and most efficient way to do your queries.<br>
+          <br>
+          DISCLAIMER: To do your own website using Odoo, you will need to handle cors.<br>
+          More informations are provided on the readme when you buy the module, but you can already have the main informations here:
+          <a href="https://github.com/divad1196/odoo_nginx_proxy">https://github.com/divad1196/odoo_nginx_proxy</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <h3>What are the differences with other solutions?</h3>
+      <ul>
+        <li>
+          <strong>Flat Learning curve</strong>: The GraphQL arguments are done in a way that they will feel like home to any Odoo developer.<br>
+        </li>
+        <li>
+          <strong>Genericity</strong>: You don't want to update your GraphQL models for each module you install.
+        </li>
+        <li>
+          <strong>Maintainance</strong>: You don't want to duplicate your code, as Odoo Model AND GraphQL model.
+          You also don't want to update your GraphQL models for each module you install.
+        </li>
+        <li>
+          <strong>Spare Time (and thus money)</strong>: You want to focus on the use of the data, not how you gather them.
+        </li>
+      </ul>
+    </div>
+    <div>
+      <h3>Security and Performance</h3>
+      <p>
+        The security policy is the one already defined by Odoo.
+        You cannot get more informations using GraphQL than you would using jsonrpc/xmlrpc.
+        (This module will be extendend with a per-fields access policy in a near future, but as long as RPC is allowed, this won't be any game-changer in term of security)
+        Those security policies must not be by-passed, which may be done by a developer for any (bad) reason.
+      </p>
+      <p>
+        The security policies in Odoo add an overhead on each requests.
+        This module optimise the search, especially for multi-level queries.
+      </p>
+    </div>
+    <div>
+      <h3>Usage</h3>
+      <p>You can perfom queries</p>
+      <div><img alt="query" src="query.png" /></div>
+      <p>As well as mutations</p>
+      <div><img alt="mutations" src="mutations.png" /></div>
+
+      <p>Using any languages (javascript, python, ...)</p>
+      <div><img alt="request" src="request.png" /></div>
+    </div>
+  </div>
+</section>
+
+<section class="oe_container">
+  <div class="oe_row oe_spaced">
+    <div class="oe_span12">
+      <h2 class="oe_slogan">Contact</h2>
+      <p>
+        If you are facing any issu with this module, please feel free to contact me using this module support
+        or on github (<a href="https://github.com/divad1196">https://github.com/divad1196</a>)
+      </p>
+    </div>
+  </div>
+</section>
+  

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Alpine.js</title>
+    <link
+        rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous"
+    />
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.2.3/cdn.js"
+        integrity="sha512-tdHUxNPB3/bSr3K5olp0biuy8ztGo8r1INBxtMCP4qOUzeRPuqkcebuUKthZ43WceXnNY+ATvHDWGrWqrZwJ2g=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+        defer
+    ></script>
+  </head>
+  <body>
+    <script src="graphql.js"></script> 
+    <script>
+        const url = "http://192.168.1.113:8100";
+        const odoo = odoo_builder(url, "graphql");
+
+        async function getTickets(variables) {
+            let data = await odoo.graphql(`
+                query Tickets {
+                    HelpdeskTicket(domain: $domain, limit: $limit) {	
+                        name
+                        description
+                        user: user_id @include(if: $user_info) {
+                            name
+                        }
+                        stage_id {
+                            name
+                        }
+                        partner_id @include(if: $partner_id)  {
+                            image: image_1920 @include(if: $image)
+                            user_id {
+                                name
+                            }
+                        }
+                    }
+                }`,
+                Object.assign({}, {domain: [], user_info: true, partner_id: false, image: false}, variables)
+            );
+            let res = data && data['HelpdeskTicket'] || [];
+            return res;
+        };
+        /*
+            Examples:
+            tickets = await getTickets()
+            tickets = await getTickets({limit: 200, offset: 400, partner_id: true})
+        */
+
+
+        async function productByName(name, image=false) {
+            query = `
+                query Test {
+                    products: ProductTemplate(domain: [["name", "ilike", $name]]) {
+                        name
+                        price: list_price
+                        image: image_1920 @include(if: $image)
+                    }
+                }
+            `
+            variables = {
+                name,
+                image
+            }
+
+            let data = await odoo.graphql(query, variables);
+            let res = data && data["products"] || [];
+            return res;
+        }
+
+        async function reloadBlogs() {
+            query = `
+                query Test {
+                    posts: BlogPost {
+                        name
+                    }
+                }
+            `
+            res = await odoo.graphql(query);
+            return res && res["posts"] || [];
+        }
+
+        async function test(operationName="test") {
+            query = `
+                query test {
+                    posts: BlogPost {
+                        name
+                    }
+                    products: ProductTemplate(limit: 30) {
+                        name
+                        image: image_1920
+                    }
+                }
+                query test2 {
+                    products: ProductTemplate(limit: 30) {
+                        name
+                        image: image_1920
+                    }
+                }
+            `
+            return odoo.graphql(query, {}, operationName);
+        }
+        async function test2(parameters) {
+            let data = await odoo.graphql(`
+                query Test {
+                    SaleOrder(domain: $domain, limit: $limit) {	
+                        name
+                        state
+                        partner_id @include(if: $partner_id)  {
+                            image: image_1920 @include(if: $image)
+                            user_id {
+                                name
+                            }
+                        }
+                        lines: order_line(domain: $lines_domain, order: $line_order) {
+                            product_id {
+                                name
+                                image: image_1920 @include(if: $image)
+                            }
+                            product_uom_qty
+                            price_subtotal
+                        }
+                    }
+                }`,
+                Object.assign({}, {domain: [], lines_domain: [], line_order: "id asc", partner_id: false, image: false}, parameters)
+            );
+            return data;
+        };
+        async function test3(parameters) {
+            let data = await odoo.graphql(`
+                mutation Test {
+                    tickets: HelpdeskTicket(domain: $domain, vals: {name: $name, description: $description}) {
+                        name
+                    }
+                }`,
+                Object.assign({}, {domain: null}, parameters)
+            );
+            return data;
+        };
+        /*
+            let ticket = (await test3({"name": "test", description: "hello world"}))["tickets"][0]  // Create a new ticket
+            await test3({domain: [["id", "=", ticket.id]], "name": "name changed", description: "hello world2"})  // Update the 
+        */
+
+        async function odoo_login(login, password) {
+            let data = await odoo.login(login, password);
+            Alpine.store("user", data || {});
+        }
+        async function odoo_logout() {
+            odoo.logout();
+            Alpine.store("user", {});
+        }
+    </script>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Navbar</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#">Link</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Dropdown
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="#">Action</a>
+                <a class="dropdown-item" href="#">Another action</a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="#">Something else here</a>
+                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#">Disabled</a>
+            </li>
+            </ul>
+            <template x-data x-if="$store.user">
+                <div x-text="$store.user.name"></div>
+            </template>
+        </div>
+    </nav>
+    <div x-data="{login: '', password: ''}">
+        <input type="text" x-model="login"/>
+        <input type="password" x-model="password"/>
+        <button @click="odoo_login(login, password)">Login</button>
+        <button @click="odoo_logout()">Log out</button>
+    </div>
+    <div x-data="{toggle: true, name: '', products: []}">
+        <h1 x-bind:class="toggle ? 'text-success' : 'text-danger'">
+            Products
+        </h1>
+        <input type="text" x-model="name" @keyup="products = await productByName(name, true)"/>
+        <div class="row">
+            <template x-for="product in products">
+                <div class="card col-2">
+                    <img
+                        class="card-img-top"
+                        alt="Card image cap"
+                        x-bind:src=" 'data:image/png;base64,' + product.image"
+                    >
+                    <div class="card-body">
+                        <h5 x-text="product.name" class="card-title"></h5>
+                        <p class="card-text" x-text="product.price || ''"></p>
+                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+    <div x-data="{blogs: []}">
+        <h1>
+            Blogs
+        </h1>
+        <ul>
+            <template x-for="blog in blogs">
+                <li>
+                    <span x-text="blog.name"></span>
+                </li>
+            </template>
+        </ul>
+        <button @click="blogs = await reloadBlogs()">Reload Blogs</button>
+    </div>
+    <div x-data="{tickets: []}">
+        <h1>
+            Tickets
+        </h1>
+        <button @click="tickets = await getTickets({limit: 30, partner_id: true, image: true})">Reload Tickets</button>
+        <template x-if="!tickets.length">
+            <div>
+                No Tickets to show, are you logged in?
+            </div>
+        </template>
+        <div class="row">
+            <template x-for="ticket in tickets">
+                <div class="col-2 card">
+                    <img
+                        class="card-img-top"
+                        alt="Card image cap"
+                        x-bind:src=" 'data:image/png;base64,' + ticket.partner_id.image"
+                    >
+                    <div class="card-body">
+                        <h5 x-text="ticket.name" class="card-title">Card title</h5>
+                        <p class="card-text" x-text="ticket.description || ''"></p>
+                        <a href="#" class="btn btn-primary">Go somewhere</a>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+    
+
+  </body>
+  <script>
+    document.addEventListener('alpine:init', async () => {
+        Alpine.store('darkMode', {
+            on: false,
+
+            toggle() {
+                this.on = ! this.on
+            }
+        })
+        let data = await odoo.session();
+        Alpine.store("user", data || {});
+    })
+</script>
+</html>
