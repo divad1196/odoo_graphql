@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # https://github.com/graphql-python/graphql-core
+from odoo import tools
 from odoo.osv.expression import AND
 
 
@@ -8,6 +9,16 @@ def parse_document(env, doc):  # Un document peut avoir plusieurs définitions
     for definition in doc.definitions:
         return parse_definition(env, definition)
 
+
+def model2name(model):
+    return "".join(p.title() for p in model.split("."))
+
+# @tools.ormcache()
+def get_model_mapping(env):
+    return {
+        model2name(name): model
+        for name, model in env.items()
+    }
 
 def parse_definition(env, d):
     type = d.operation.value  # MUTATION OR QUERY
@@ -20,16 +31,13 @@ def parse_definition(env, d):
     #     ...
 
     data = {}
+    model_mapping = get_model_mapping(env)
     for field in d.selection_set.selections:
         name = field.name.value
-        model = get_model_by_name(env, name)
+        model = model_mapping[name]
         data[name] = parse_model_field(model, field)
     return data
 
-
-def get_model_by_name(env, name):
-    # Todo
-    return env["sale.order"]
 
 # Nb: il y a 2 niveau de champs, les racines et ceux dessous
 # => on doit parfois récupérer un model, parfois un champs

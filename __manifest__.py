@@ -13,6 +13,9 @@
         "base",
     ],
     "data": [],
+    "external_dependencies": {
+        "python": ["graphql-core"],
+    },
     "installable": True,
     "auto_install": False,
 }

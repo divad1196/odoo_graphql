@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
 
+from . import http
 from . import controllers
-from .controllers import parse_document
+from .utils import parse_document

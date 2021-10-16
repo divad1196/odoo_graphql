@@ -8,10 +8,11 @@
 
 from graphql import parse
 parse_document = odoo.addons.odoo_graphql.parse_document
+get_model_mapping = odoo.addons.odoo_graphql.utils.get_model_mapping
 
 document = parse("""
 {
-  SaleOrder(domain: [["id", "<", 17]]) {
+  SaleOrder(domain: [["id", "<", 50]]) {
     amount_total
     order_line {
       name
@@ -22,4 +23,4 @@ document = parse("""
 """)
 
 data = parse_document(env, document)
-d = data["SaleOrder"][0]
+sales = data["SaleOrder"]
