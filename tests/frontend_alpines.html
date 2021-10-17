@@ -21,10 +21,8 @@
     <script src="graphql.js"></script> 
     <script>
         const url = "http://192.168.1.113:8100";
-        var graphql = graphqlbuilder(url + '/graphql');
-        async function odoo_login(login, password){
-            return odoo_authenticate(url, "open-net-test", login, password)
-        }
+        const odoo = odoo_builder(url, "open-net-test");
+
         async function productByName(name) {
             query = `
                 query Test {
@@ -37,8 +35,7 @@
             variables = {
                 name
             }
-            let data = await graphql(query, variables)
-                .then(r => r.json())
+            let data = await odoo.graphql(query, variables)
                 .then(data => {
                     console.log('data returned:', data)
                     return data
@@ -48,11 +45,24 @@
             console.log(res);
             return res;
         }
+
+        async function reloadBlogs() {
+            query = `
+                query Test {
+                    posts: BlogPost {
+                        name
+                    }
+                }
+            `
+            res = await odoo.graphql(query);
+            return res && res["posts"] || [];
+        }
     </script>
     <div x-data="{login: '', password: ''}">
         <input type="text" x-model="login"/>
         <input type="text" x-model="password"/>
-        <button @click="odoo_login(login, password)">Login</button>
+        <button @click="odoo.login(login, password)">Login</button>
+        <button @click="odoo.logout()">Log out</button>
     </div>
     <div x-data="{toggle: true, name: '', products: []}">
         <h1 x-bind:class="toggle ? 'text-success' : 'text-danger'">
@@ -67,6 +77,19 @@
                 </li>
             </template>
         </ul>
+    </div>
+    <div x-data="{blogs: []}">
+        <h1>
+            Blogs
+        </h1>
+        <ul>
+            <template x-for="blog in blogs">
+                <li>
+                    <span x-text="blog.name"></span>
+                </li>
+            </template>
+        </ul>
+        <button @click="blogs = await reloadBlogs()">Reload Blogs</button>
     </div>
     
 

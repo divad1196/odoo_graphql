@@ -49,6 +49,8 @@ def parse_definition(env, d, variables={}):
 def parse_model_field(model, field, variables={}, ids=None):
     domain, kwargs = parse_arguments(field.arguments, variables)
     if ids:
+        if not isinstance(ids, (list, tuple)):
+            ids = [ids]
         domain = AND([
             [("id", "in", ids)],
             domain
@@ -57,7 +59,7 @@ def parse_model_field(model, field, variables={}, ids=None):
     fields_names = [f.name.value for f in fields]
 
     # Get datas
-    records = model.search_read(domain, fields_names, **kwargs)
+    records = model.search(domain, **kwargs).read(fields_names, load=False)
 
     fields_data = get_fields_data(model, fields)
     data = []
