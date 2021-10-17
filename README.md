@@ -8,6 +8,13 @@ Not handled in this module.
 If needed, use a proxy or a module allowing cors in Odoo.
 E.g.: My side project [odoo_nginx_proxy](https://github.com/divad1196/odoo_nginx_proxy)
 
+```bash
+HOST_IP=$(ip a show dev eno1 | grep -Po '(?<=inet ).*(?=/)')
+docker run -p 8100:80 -e "PROXY=http://$HOST_IP:8069" odoo_nginx
+```
+
+Nb: For production, explicitly set the CORS environnement variable
+
 
 
 #### Reminder
