@@ -7,7 +7,9 @@ from graphql.language.ast import (
     VariableNode
 )
 
+
 def parse_document(env, doc, variables={}):  # Un document peut avoir plusieurs définitions
+    variables = {**env.context, **variables}
     for definition in doc.definitions:
         return parse_definition(env, definition, variables=variables)
 
@@ -23,6 +25,7 @@ def get_model_mapping(env):
         model2name(name): model
         for name, model in env.items()
     }
+
 
 def parse_definition(env, d, variables={}):
     type = d.operation.value  # MUTATION OR QUERY
@@ -86,6 +89,7 @@ def parse_model_field(model, field, variables={}, ids=None):
         data.append(tmp)
     return data
 
+
 def get_fields_data(model, fields):
     relations = {}
     for field in fields:
@@ -110,6 +114,7 @@ OPTIONS = [
     ("order", str)
 ]
 
+
 # https://stackoverflow.com/questions/45674423/how-to-filter-greater-than-in-graphql
 def parse_arguments(args, variables={}):  # return a domain and kwargs
     args = {
@@ -122,6 +127,7 @@ def parse_arguments(args, variables={}):  # return a domain and kwargs
         if value:
             kwargs[opt] = cast(value)
     return args.pop("domain", []), kwargs
+
 
 def value2py(value, variables={}):
     if isinstance(value, VariableNode):
