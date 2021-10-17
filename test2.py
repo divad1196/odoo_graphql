@@ -24,7 +24,7 @@ query = """
 {
   ProductTemplate(domain: []) {
     name
-    product_variant_ids {
+    variants: product_variant_ids {
       name
     }
   }
@@ -33,7 +33,7 @@ query = """
 
 
 res = requests.post(
-    "http://localhost:8069/graphql?database=open-net-test",
+    "http://localhost:8069/graphql",
     data=query,
     params={"db": "open-net-test"},
     # headers={"Content-type": "text/"},

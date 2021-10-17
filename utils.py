@@ -33,9 +33,9 @@ def parse_definition(env, d):
     data = {}
     model_mapping = get_model_mapping(env)
     for field in d.selection_set.selections:
-        name = field.name.value
-        model = model_mapping[name]
-        data[name] = parse_model_field(model, field)
+        model = model_mapping[field.name.value]
+        fname = field.alias and field.alias.value or field.name.value
+        data[fname] = parse_model_field(model, field)
     return data
 
 
@@ -45,19 +45,29 @@ def parse_model_field(model, field, ids=None):
     domain = parse_arguments(field.arguments)
     if ids:
         domain = AND([
-            [("id", "in", ids)]
+            [("id", "in", ids)],
+            domain
         ])
     fields = field.selection_set.selections
     fields_names = [f.name.value for f in fields]
-    relations = get_relational_fields(model, fields)
 
+    # Get datas
     records = model.search_read(domain, fields_names)
+
+    # Get subdata
+    relations = get_relational_fields(model, fields)
     if relations:
         for rec in records:
             for rel, model_name, field in relations:
                 rec[rel] = parse_model_field(
                     model.env[model_name], field, ids=rec[rel],
                 )
+    # Apply aliases
+    aliases = [(f.name.value, f.alias.value) for f in fields if f.alias]
+    if aliases:
+        for rec in records:
+            for field, alias in aliases:
+                rec[alias] = rec.pop(field)
     return records
 
 

@@ -14,7 +14,7 @@ document = parse("""
 {
   SaleOrder(domain: [["id", "<", 50]]) {
     amount_total
-    order_line {
+    lines: order_line {
       name
       price_total
     }
