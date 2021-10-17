@@ -14,7 +14,8 @@
 * See my side project "odoo_nginx_proxy"
 
   ```bash
-  docker run -p 8100:80 -e 'PROXY=http://localhost:8069' -e 'CORS=*' odoo_nginx_proxy
+  HOST_IP=$(ip a show dev eno1 | grep -Po '(?<=inet ).*(?=/)')
+  docker run -p 8100:80 -e "PROXY=http://$HOST_IP:8069" -e 'CORS=*' odoo_nginx_proxy
   ```
 
   

@@ -11,8 +11,17 @@ class GraphQL(http.Controller):
         website=True, sitemap=False, csrf=False, cors="*"
     )
     def graphql(self):
+        query = request.graphqlrequest
+        variables = {}
+        try:
+            data = json.loads(request.graphqlrequest)
+            query = data["query"]
+            variables = data.get("variables", {})
+        except Exception:
+            pass
+
         return json.dumps(
             parse_document(
-                request.env, parse(request.graphqlrequest)
+                request.env, parse(query), variables=variables
             )
         )

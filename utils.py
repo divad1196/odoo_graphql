@@ -3,11 +3,13 @@
 # https://github.com/graphql-python/graphql-core
 from odoo import tools
 from odoo.osv.expression import AND
+from graphql.language.ast import (
+    VariableNode
+)
 
-
-def parse_document(env, doc):  # Un document peut avoir plusieurs définitions
+def parse_document(env, doc, variables={}):  # Un document peut avoir plusieurs définitions
     for definition in doc.definitions:
-        return parse_definition(env, definition)
+        return parse_definition(env, definition, variables=variables)
 
 
 def model2name(model):
@@ -22,7 +24,7 @@ def get_model_mapping(env):
         for name, model in env.items()
     }
 
-def parse_definition(env, d):
+def parse_definition(env, d, variables={}):
     type = d.operation.value  # MUTATION OR QUERY
     # name = d.name.value  # Usage in response? Only for debug
     if type != "query":
@@ -38,14 +40,16 @@ def parse_definition(env, d):
     for field in d.selection_set.selections:
         model = model_mapping[field.name.value]
         fname = field.alias and field.alias.value or field.name.value
-        data[fname] = parse_model_field(model, field)
+        data[fname] = parse_model_field(model, field, variables=variables)
     return data
 
 
 # Nb: il y a 2 niveau de champs, les racines et ceux dessous
 # => on doit parfois récupérer un model, parfois un champs
-def parse_model_field(model, field, ids=None):
-    domain, kwargs = parse_arguments(field.arguments)
+def parse_model_field(model, field, variables={}, ids=None):
+    domain, kwargs = parse_arguments(field.arguments, variables)
+    print("=" * 50)
+    print(domain)
     if ids:
         domain = AND([
             [("id", "in", ids)],
@@ -70,7 +74,9 @@ def parse_model_field(model, field, ids=None):
                         tmp[fname] = value
                     else:
                         tmp[fname] = parse_model_field(
-                            model, f, ids=value,
+                            model, f,
+                            variables=variables,
+                            ids=value,
                         )
             elif fields:
                 for f in fields:
@@ -105,12 +111,12 @@ OPTIONS = [
 ]
 
 # https://stackoverflow.com/questions/45674423/how-to-filter-greater-than-in-graphql
-def parse_arguments(args):  # return a domain
+def parse_arguments(args, variables={}):  # return a domain
     # Todo: ajouter support pour d'autres valeurs, comme limit, order, ..
     # for a in args:
     #     breakpoint()
     args = {
-        a.name.value: value2py(a.value)
+        a.name.value: value2py(a.value, variables)
         for a in args
     }
     kwargs = {}
@@ -120,12 +126,16 @@ def parse_arguments(args):  # return a domain
             kwargs[opt] = cast(value)
     return args.pop("domain", []), kwargs
 
-def value2py(value):
+def value2py(value, variables={}):
+    if isinstance(value, VariableNode):
+        print("VariableNode")
+        print(variables)
+        return variables.get(value.name.value)
     if hasattr(value, "value"):
         return value.value
     if hasattr(value, "values"):
         return [
-            value2py(v)
+            value2py(v, variables=variables)
             for v in value.values
         ]
     raise Exception("Can not convert")
