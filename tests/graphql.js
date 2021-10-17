@@ -44,7 +44,7 @@ async function odoo_logout(url) {
 }
 
 function graphqlbuilder(url) {
-    function graphql(query, variables={}) {
+    async function graphql(query, variables={}) {
         return fetch(url, {
             method: 'POST',
             credentials: 'include',
