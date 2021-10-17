@@ -18,18 +18,12 @@
     ></script>
   </head>
   <body>
+    <script src="graphql.js"></script> 
     <script>
-        function graphql(query, variables={}) {
-            return fetch('http://192.168.1.113:8100/graphql', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/graphql',
-                },
-                body: JSON.stringify({
-                    query: query,
-                    variables: variables
-                })
-              })
+        const url = "http://192.168.1.113:8100";
+        var graphql = graphqlbuilder(url + '/graphql');
+        async function odoo_login(login, password){
+            return odoo_authenticate(url, "open-net-test", login, password)
         }
         async function productByName(name) {
             query = `
@@ -55,6 +49,11 @@
             return res;
         }
     </script>
+    <div x-data="{login: '', password: ''}">
+        <input type="text" x-model="login"/>
+        <input type="text" x-model="password"/>
+        <button @click="odoo_login(login, password)">Login</button>
+    </div>
     <div x-data="{toggle: true, name: '', products: []}">
         <h1 x-bind:class="toggle ? 'text-success' : 'text-danger'">
             Products
