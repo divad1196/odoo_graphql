@@ -6,12 +6,11 @@
   Dans la plupart des cas, on voudra passer par une route pour faire du traitement spécifique
   On peut imaginer faire du CRUD sur les tickets par exemple.
 * Support for operation name
-* Support for variables
 * Support for directives
 
 
 
-* See my side project "odoo_nginx_proxy"
+* See my side project "odoo_nginx_proxy" to handle cors and cache
 
   ```bash
   HOST_IP=$(ip a show dev eno1 | grep -Po '(?<=inet ).*(?=/)')

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Alpine.js</title>
+    <link
+        rel="stylesheet"
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+        crossorigin="anonymous"
+    />
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/alpinejs/3.2.3/cdn.js"
+        integrity="sha512-tdHUxNPB3/bSr3K5olp0biuy8ztGo8r1INBxtMCP4qOUzeRPuqkcebuUKthZ43WceXnNY+ATvHDWGrWqrZwJ2g=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+        defer
+    ></script>
+  </head>
+  <body>
+    <script>
+        function graphql(query, variables={}) {
+            return fetch('http://192.168.1.113:8100/graphql', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/graphql',
+                },
+                body: JSON.stringify({
+                    query: query,
+                    variables: variables
+                })
+              })
+        }
+        async function productByName(name) {
+            query = `
+                query Test {
+                    products: ProductTemplate(domain: [["name", "ilike", $name]]) {
+                        name
+                        price: list_price
+                    }
+                }
+            `
+            variables = {
+                name
+            }
+            let data = await graphql(query, variables)
+                .then(r => r.json())
+                .then(data => {
+                    console.log('data returned:', data)
+                    return data
+                });
+            
+            let res = data && data["products"] || [];
+            console.log(res);
+            return res;
+        }
+    </script>
+    <div x-data="{toggle: true, name: '', products: []}">
+        <h1 x-bind:class="toggle ? 'text-success' : 'text-danger'">
+            Products
+        </h1>
+        <input type="text" x-model="name" @keydown="products = await productByName(name)"/>
+        <ul>
+            <template x-for="product in products">
+                <li>
+                    <span x-text="product.name" />
+                    <span x-text="product.price" />
+                </li>
+            </template>
+        </ul>
+    </div>
+    
+
+  </body>
+  <script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.store('darkMode', {
+            on: false,
+
+            toggle() {
+                this.on = ! this.on
+            }
+        })
+    })
+</script>
+</html>

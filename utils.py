@@ -48,8 +48,6 @@ def parse_definition(env, d, variables={}):
 # => on doit parfois récupérer un model, parfois un champs
 def parse_model_field(model, field, variables={}, ids=None):
     domain, kwargs = parse_arguments(field.arguments, variables)
-    print("=" * 50)
-    print(domain)
     if ids:
         domain = AND([
             [("id", "in", ids)],
@@ -111,10 +109,7 @@ OPTIONS = [
 ]
 
 # https://stackoverflow.com/questions/45674423/how-to-filter-greater-than-in-graphql
-def parse_arguments(args, variables={}):  # return a domain
-    # Todo: ajouter support pour d'autres valeurs, comme limit, order, ..
-    # for a in args:
-    #     breakpoint()
+def parse_arguments(args, variables={}):  # return a domain and kwargs
     args = {
         a.name.value: value2py(a.value, variables)
         for a in args
@@ -128,8 +123,6 @@ def parse_arguments(args, variables={}):  # return a domain
 
 def value2py(value, variables={}):
     if isinstance(value, VariableNode):
-        print("VariableNode")
-        print(variables)
         return variables.get(value.name.value)
     if hasattr(value, "value"):
         return value.value
