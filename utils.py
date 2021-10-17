@@ -22,6 +22,7 @@ def get_model_mapping(env):
 
 def parse_definition(env, d):
     type = d.operation.value  # MUTATION OR QUERY
+    # name = d.name.value  # Usage in response? Only for debug
     if type != "query":
         return  # Does not support mutations currently
 
@@ -54,32 +55,44 @@ def parse_model_field(model, field, ids=None):
     # Get datas
     records = model.search_read(domain, fields_names)
 
-    # Get subdata
-    relations = get_relational_fields(model, fields)
-    if relations:
-        for rec in records:
-            for rel, model_name, field in relations:
-                rec[rel] = parse_model_field(
-                    model.env[model_name], field, ids=rec[rel],
-                )
-    # Apply aliases
-    aliases = [(f.name.value, f.alias.value) for f in fields if f.alias]
-    if aliases:
-        for rec in records:
-            for field, alias in aliases:
-                rec[alias] = rec.pop(field)
-    return records
+    fields_data = get_fields_data(model, fields)
+    data = []
+    for rec in records:
+        tmp = {}
+        for key, value in rec.items():
+            model, fname, fields = fields_data.get(key, (None, None, None))
+            if model is not None:
+                for f in fields:
+                    fname = f.alias and f.alias.value or f.name.value
+                    if not f.selection_set:
+                        tmp[fname] = value
+                    else:
+                        tmp[fname] = parse_model_field(
+                            model, f, ids=value,
+                        )
+            elif fields:
+                for f in fields:
+                    tmp[fname] = value
+            else:
+                tmp[key] = value  # e.g.: id is gathered even if not requested
+        data.append(tmp)
+    return data
 
-
-def get_relational_fields(model, fields):
-    relations = []
+def get_fields_data(model, fields):
+    relations = {}
     for field in fields:
         name = field.name.value
+        fname = field.alias and field.alias.value or name
         f = model._fields[name]
-        if f.relational:
-            relations.append(
-                (name, f.comodel_name, field)
+        r = relations.setdefault(
+            name,
+            (
+                model.env[f.comodel_name] if f.relational else None,
+                fname,
+                []
             )
+        )
+        r[2].append(field)
     return relations
 
 # https://stackoverflow.com/questions/45674423/how-to-filter-greater-than-in-graphql

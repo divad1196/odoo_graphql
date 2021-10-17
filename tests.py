@@ -18,9 +18,31 @@ document = parse("""
       name
       price_total
     }
+    line_ids: order_line
   }
 }
 """)
 
+
 data = parse_document(env, document)
 sales = data["SaleOrder"]
+
+
+
+
+query = """
+  query HeroNameAndFriends($episode: Episode) {
+    hero(episode: $episode) {
+      name
+      friends {
+        name
+      }
+    }
+  }
+"""
+
+variables = {
+  "episode": "JEDI"
+}
+
+document = parse(query)
