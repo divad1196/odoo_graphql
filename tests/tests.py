@@ -31,7 +31,7 @@ sales = data["SaleOrder"]
 
 
 query = """
-  query HeroNameAndFriends($episode: Episode) {
+  query HeroNameAndFriends ($episode: Episode) @include(if: true) {
     hero(episode: $episode) {
       name
       friends {

@@ -26,6 +26,33 @@ def get_model_mapping(env):
         for name, model in env.items()
     }
 
+def filter_by_directives(node, variables={}):
+    if not node.selection_set:
+        return
+    selections = []
+    for field in node.selection_set.selections:
+        if parse_directives(field.directives, variables=variables):
+            selections.append(field)
+            filter_by_directives(field, variables=variables)
+    node.selection_set.selections = selections
+
+
+def parse_directives(directives, variables={}):
+    """Currently return True to keep, False to skip """
+    for d in directives:
+        if d.name.value == "include":
+            for arg in d.arguments:
+                if arg.name.value == 'if':
+                    value = value2py(arg.value, variables=variables)
+                    print("Directive: include if", value)
+                    return value
+        elif d.name.value == "skip":
+            for arg in d.arguments:
+                if arg.name.value == 'if':
+                    value = value2py(arg.value, variables=variables)
+                    return not value
+    return True  # Keep by default
+
 
 def parse_definition(env, d, variables={}):
     type = d.operation.value  # MUTATION OR QUERY
@@ -33,8 +60,8 @@ def parse_definition(env, d, variables={}):
     if type != "query":
         return  # Does not support mutations currently
 
-    # for directive in d.directives:
-    #     ...
+    filter_by_directives(d, variables)
+
     # for var in d.variable_definitions:
     #     ...
 

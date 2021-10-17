@@ -23,19 +23,22 @@
         const url = "http://192.168.1.113:8100";
         const odoo = odoo_builder(url, "open-net-test");
 
-        async function getTickets() {
+        async function getTickets(user_info=true) {
             return odoo.graphql(`
                 query Tickets {
                     HelpdeskTicket(domain: [["user_id", "=", $uid]]) {	
                         name
-                    user: user_id {
+                    user: user_id @include(if: $user_info) {
                             name
                         }
                         stage_id {
                         name
                         }
                     }
-                }`
+                }`,
+                {
+                    user_info
+                }
             );
         };
 
