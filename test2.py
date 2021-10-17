@@ -5,7 +5,7 @@ query = """
 query Test {
   ProductTemplate(domain: []) {
     name
-    variants: product_variant_ids {
+    variants: product_variant_ids(limit: 5) {
       name
     }
     variants_ids: product_variant_ids

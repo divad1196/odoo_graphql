@@ -8,7 +8,7 @@ from ..utils import parse_document
 class GraphQL(http.Controller):
     @http.route(
         "/graphql", auth="public", type="http",
-        website=True, sitemap=False, csrf=False
+        website=True, sitemap=False, csrf=False, cors="*"
     )
     def graphql(self):
         return json.dumps(

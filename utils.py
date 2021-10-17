@@ -43,7 +43,7 @@ def parse_definition(env, d):
 # Nb: il y a 2 niveau de champs, les racines et ceux dessous
 # => on doit parfois récupérer un model, parfois un champs
 def parse_model_field(model, field, ids=None):
-    domain = parse_arguments(field.arguments)
+    domain, kwargs = parse_arguments(field.arguments)
     if ids:
         domain = AND([
             [("id", "in", ids)],
@@ -53,7 +53,7 @@ def parse_model_field(model, field, ids=None):
     fields_names = [f.name.value for f in fields]
 
     # Get datas
-    records = model.search_read(domain, fields_names)
+    records = model.search_read(domain, fields_names, **kwargs)
 
     fields_data = get_fields_data(model, fields)
     data = []
@@ -95,6 +95,13 @@ def get_fields_data(model, fields):
         r[2].append(field)
     return relations
 
+
+OPTIONS = [
+    ("offset", int),
+    ("limit", int),
+    ("order", str)
+]
+
 # https://stackoverflow.com/questions/45674423/how-to-filter-greater-than-in-graphql
 def parse_arguments(args):  # return a domain
     # Todo: ajouter support pour d'autres valeurs, comme limit, order, ..
@@ -104,7 +111,12 @@ def parse_arguments(args):  # return a domain
         a.name.value: value2py(a.value)
         for a in args
     }
-    return args.get("domain", [])
+    kwargs = {}
+    for opt, cast in OPTIONS:
+        value = args.pop(opt, None)
+        if value:
+            kwargs[opt] = cast(value)
+    return args.pop("domain", []), kwargs
 
 def value2py(value):
     if hasattr(value, "value"):
