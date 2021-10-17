@@ -3,8 +3,9 @@ import requests
 
 query = """
 query Test {
-  ProductTemplate(domain: []) {
+  products: ProductTemplate(domain: []) {
     name
+    list_price
     variants: product_variant_ids(limit: 5) {
       name
     }

@@ -13,6 +13,8 @@ def parse_document(env, doc):  # Un document peut avoir plusieurs définitions
 def model2name(model):
     return "".join(p.title() for p in model.split("."))
 
+
+# See self.clear_caches(): we need a cache that changes with module install?
 # @tools.ormcache()
 def get_model_mapping(env):
     return {

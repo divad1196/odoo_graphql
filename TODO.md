@@ -8,3 +8,14 @@
 * Support for operation name
 * Support for variables
 * Support for directives
+
+
+
+* See my side project "odoo_nginx_proxy"
+
+  ```bash
+  docker run -p 8100:80 -e 'PROXY=http://localhost:8069' -e 'CORS=*' odoo_nginx_proxy
+  ```
+
+  
+
