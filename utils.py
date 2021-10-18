@@ -79,12 +79,17 @@ def parse_definition(env, d, variables={}):
 def parse_model_field(model, field, variables={}, ids=None):
     domain, kwargs = parse_arguments(field.arguments, variables)
     if ids:
-        if not isinstance(ids, (list, tuple)):
-            ids = [ids]
-        domain = AND([
-            [("id", "in", ids)],
-            domain
-        ])
+        if isinstance(ids, (list, tuple)):
+            domain = AND([
+                [("id", "in", ids)],
+                domain
+            ])
+        elif isinstance(ids, int):
+            domain = AND([
+                [("id", "=", ids)],
+                domain
+            ])
+
     fields = field.selection_set.selections
     fields_names = [f.name.value for f in fields]
 
@@ -96,24 +101,26 @@ def parse_model_field(model, field, variables={}, ids=None):
     for rec in records:
         tmp = {}
         for key, value in rec.items():
-            model, fname, fields = fields_data.get(key, (None, None, None))
+            model, fname, fields = fields_data.get(key, (None, ) * 3)
             if model is not None:
                 for f in fields:
                     fname = f.alias and f.alias.value or f.name.value
-                    if not f.selection_set:
-                        tmp[fname] = value
-                    else:
-                        tmp[fname] = parse_model_field(
+                    subdata = value
+                    if f.selection_set:
+                        subdata = parse_model_field(
                             model, f,
                             variables=variables,
                             ids=value,
                         )
+                    tmp[fname] = subdata
             elif fields:
                 for f in fields:
                     tmp[fname] = value
             else:
                 tmp[key] = value  # e.g.: id is gathered even if not requested
         data.append(tmp)
+    if data and isinstance(ids, int):
+        data = data[0]
     return data
 
 
@@ -128,7 +135,7 @@ def get_fields_data(model, fields):
             (
                 model.env[f.comodel_name] if f.relational else None,
                 fname,
-                []
+                [],
             )
         )
         r[2].append(field)
