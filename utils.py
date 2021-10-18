@@ -4,7 +4,11 @@
 from odoo import tools
 from odoo.osv.expression import AND
 from graphql.language.ast import (
-    VariableNode
+    VariableNode,
+    ValueNode,
+    ListValueNode,
+    IntValueNode,
+    FloatValueNode
 )
 
 
@@ -160,17 +164,25 @@ def parse_arguments(args, variables={}):  # return a domain and kwargs
         value = args.pop(opt, None)
         if value:
             kwargs[opt] = cast(value)
+    print(args)
     return args.pop("domain", []), kwargs
 
 
 def value2py(value, variables={}):
     if isinstance(value, VariableNode):
         return variables.get(value.name.value)
-    if hasattr(value, "value"):
+    if isinstance(value, ValueNode):
+        if isinstance(value, ListValueNode):
+            return [
+                value2py(v, variables=variables)
+                for v in value.values
+            ]
+        # For unknown reason, integers and floats are received as string,
+        # but not booleans nor list
+        if isinstance(value, IntValueNode):
+            return int(value.value)
+        if isinstance(value, FloatValueNode):
+            return float(value.value)
         return value.value
-    if hasattr(value, "values"):
-        return [
-            value2py(v, variables=variables)
-            for v in value.values
-        ]
+        
     raise Exception("Can not convert")
