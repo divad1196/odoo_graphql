@@ -20,9 +20,7 @@ async function odoo_authenticate(url, database, login, password) {
             }
         })
     };
-    var res = (await fetch(url, parameters)).json();
-    return res;
-}
+    return fetch(url, parameters).then(r => r.json())
 
 async function odoo_logout(url) {
     headers = new Headers({

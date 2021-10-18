@@ -48,7 +48,6 @@ def parse_directives(directives, variables={}):
             for arg in d.arguments:
                 if arg.name.value == 'if':
                     value = value2py(arg.value, variables=variables)
-                    print("Directive: include if", value)
                     return value
         elif d.name.value == "skip":
             for arg in d.arguments:
@@ -65,9 +64,6 @@ def parse_definition(env, d, variables={}):
         return  # Does not support mutations currently
 
     filter_by_directives(d, variables)
-
-    # for var in d.variable_definitions:
-    #     ...
 
     data = {}
     model_mapping = get_model_mapping(env)
@@ -164,7 +160,6 @@ def parse_arguments(args, variables={}):  # return a domain and kwargs
         value = args.pop(opt, None)
         if value:
             kwargs[opt] = cast(value)
-    print(args)
     return args.pop("domain", []), kwargs
 
 
