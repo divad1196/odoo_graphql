@@ -70,7 +70,9 @@ def parse_definition(env, d, variables={}):
     for field in d.selection_set.selections:
         model = model_mapping[field.name.value]
         fname = field.alias and field.alias.value or field.name.value
-        data[fname] = parse_model_field(model, field, variables=variables)
+        gather = convert_model_field(model, field, variables=variables)
+        data[fname] = gather()
+        # data[fname] = parse_model_field(model, field, variables=variables)
     return data
 
 
@@ -128,18 +130,17 @@ def get_fields_data(model, fields):
     relations = {}
     for field in fields:
         name = field.name.value
-        fname = field.alias and field.alias.value or name
         f = model._fields[name]
         r = relations.setdefault(
             name,
             (
                 model.env[f.comodel_name] if f.relational else None,
-                fname,
+                name,
                 [],
             )
         )
         r[2].append(field)
-    return relations
+    return relations.values()
 
 
 OPTIONS = [
@@ -181,3 +182,72 @@ def value2py(value, variables={}):
         return value.value
         
     raise Exception("Can not convert")
+
+def make_domain(domain, ids):
+    if ids:
+        if isinstance(ids, (list, tuple)):
+            domain = AND([
+                [("id", "in", ids)],
+                domain
+            ])
+        elif isinstance(ids, int):
+            domain = AND([
+                [("id", "=", ids)],
+                domain
+            ])
+    return domain
+
+
+def do_nothing(value):
+    return value
+
+
+def convert_model_field(model, field, variables={}):
+    domain, kwargs = parse_arguments(field.arguments, variables)
+    fields = field.selection_set.selections
+    fields_names = [f.name.value for f in fields]
+    fields_data = get_fields_data(model, fields)  # [(model, fname, fields), ...]
+
+    subgathers = {}
+    for submodel, fname, fields in fields_data:
+        aliases = []
+        if submodel is not None:
+            # If relational field, we want to get the subdatas
+            for f in fields:
+                alias = f.alias and f.alias.value or f.name.value
+                subgather = do_nothing  # If no subdata requested, return the ids
+                if f.selection_set:
+                    subgather = convert_model_field(
+                        submodel, f,
+                        variables=variables
+                    )
+                aliases.append(
+                    (alias, subgather)
+                )
+        else:
+            for f in fields:
+                alias = f.alias and f.alias.value or f.name.value
+                aliases.append(
+                    (alias, do_nothing)
+                )
+        if aliases:
+            subgathers[fname] = aliases
+
+    def gather(ids=None):
+        records = model.search(
+            make_domain(domain, ids), **kwargs
+        ).read(fields_names, load=False)
+        data = []
+        for rec in records:
+            tmp = {}
+            for key, value in rec.items():
+                aliases = subgathers.get(key, [])
+                for alias, func in aliases:
+                    tmp[alias] = func(value)
+            data.append(tmp)
+        
+        if data and isinstance(ids, int):
+            data = data[0]
+        return data
+
+    return gather
