@@ -2,14 +2,10 @@
 
 
 
-* Faire le traitement graphql **AU DEBUT** pour éviter de répeter certaines actions
-  => créer une structure intermédiaire avec les fonctions nécessaires après/pendant le filtrage
-  * Transformation des arguments
-  * Préparation des champs à traiter (cf alias et champs relationnels)
+* Performance: Faire les requêtes par niveau et réassembler ensuite ?
+  Sinon, voir si je peux améliorer le pré-assemblage actuel autrement
 
-* Support for mutations?
-  Dans la plupart des cas, on voudra passer par une route pour faire du traitement spécifique
-  On peut imaginer faire du CRUD sur les tickets par exemple.
+* Support for mutations: Elles sont sur 1 seul niveau apparement, donc ok?
   
 * Support for operation name
 
