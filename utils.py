@@ -8,14 +8,8 @@ from graphql.language.ast import (
     ValueNode,
     ListValueNode,
     IntValueNode,
-    FloatValueNode
+    FloatValueNode,
 )
-
-
-def parse_document(env, doc, variables={}):  # Un document peut avoir plusieurs définitions
-    variables = {**env.context, **variables}
-    for definition in doc.definitions:
-        return parse_definition(env, definition, variables=variables)
 
 
 def model2name(model):
@@ -25,10 +19,8 @@ def model2name(model):
 # See self.clear_caches(): we need a cache that changes with module install?
 # @tools.ormcache()
 def get_model_mapping(env):
-    return {
-        model2name(name): model
-        for name, model in env.items()
-    }
+    return {model2name(name): model for name, model in env.items()}
+
 
 def filter_by_directives(node, variables={}):
     if not node.selection_set:
@@ -41,23 +33,32 @@ def filter_by_directives(node, variables={}):
     node.selection_set.selections = selections
 
 
+def parse_document(
+    env, doc, variables={}
+):  # Un document peut avoir plusieurs définitions
+    variables = {**env.context, **variables}
+    model_mapping = get_model_mapping(env)
+    for definition in doc.definitions:
+        return parse_definition(env, definition, model_mapping, variables=variables)
+
+
 def parse_directives(directives, variables={}):
-    """Currently return True to keep, False to skip """
+    """Currently return True to keep, False to skip"""
     for d in directives:
         if d.name.value == "include":
             for arg in d.arguments:
-                if arg.name.value == 'if':
+                if arg.name.value == "if":
                     value = value2py(arg.value, variables=variables)
                     return value
         elif d.name.value == "skip":
             for arg in d.arguments:
-                if arg.name.value == 'if':
+                if arg.name.value == "if":
                     value = value2py(arg.value, variables=variables)
                     return not value
     return True  # Keep by default
 
 
-def parse_definition(env, d, variables={}):
+def parse_definition(env, d, model_mapping, variables={}):
     type = d.operation.value  # MUTATION OR QUERY
     # name = d.name.value  # Usage in response? Only for debug
     if type != "query":
@@ -66,96 +67,114 @@ def parse_definition(env, d, variables={}):
     filter_by_directives(d, variables)
 
     data = {}
-    model_mapping = get_model_mapping(env)
     for field in d.selection_set.selections:
         model = model_mapping[field.name.value]
         fname = field.alias and field.alias.value or field.name.value
-        gather = convert_model_field(model, field, variables=variables)
-        data[fname] = gather()
-        # data[fname] = parse_model_field(model, field, variables=variables)
+        data[fname] = parse_model_field(model, field, variables=variables)
     return data
+
+
+def relation_subgathers(records, relational_data, variables={}):
+    subgathers = {}
+    for submodel, fname, fields in relational_data:
+        sub_records_ids = records.mapped(fname).ids
+        aliases = []
+        for f in fields:
+            alias = f.alias and f.alias.value or f.name.value
+            tmp = parse_model_field(
+                submodel, f, variables=variables, ids=sub_records_ids
+            )
+            data = {d["id"]: d for d in tmp}
+
+            # https://stackoverflow.com/questions/8946868/is-there-a-pythonic-way-to-close-over-a-loop-variable
+            def subgather(ids, data=data):
+                if ids is False:
+                    return None
+                # Possible de ne pas avoir l'id recherché ou bug?
+                # => Oui a cause des records archivés
+                if isinstance(ids, int):
+                    return data.get(ids)
+                return [d for d in (data.get(rec_id) for rec_id in ids) if d]
+
+            aliases.append((alias, subgather))
+
+        subgathers[fname] = aliases
+    return subgathers
+
+
+def make_domain(domain, ids):
+    if ids:
+        if isinstance(ids, (list, tuple)):
+            domain = AND([[("id", "in", ids)], domain])
+        elif isinstance(ids, int):
+            domain = AND([[("id", "=", ids)], domain])
+    return domain
 
 
 # Nb: il y a 2 niveau de champs, les racines et ceux dessous
 # => on doit parfois récupérer un model, parfois un champs
 def parse_model_field(model, field, variables={}, ids=None):
     domain, kwargs = parse_arguments(field.arguments, variables)
-    if ids:
-        if isinstance(ids, (list, tuple)):
-            domain = AND([
-                [("id", "in", ids)],
-                domain
-            ])
-        elif isinstance(ids, int):
-            domain = AND([
-                [("id", "=", ids)],
-                domain
-            ])
-
     fields = field.selection_set.selections
     fields_names = [f.name.value for f in fields]
 
     # Get datas
-    records = model.search(domain, **kwargs).read(fields_names, load=False)
+    records = model.search(make_domain(domain, ids), **kwargs)
 
-    fields_data = get_fields_data(model, fields)
+    relational_data, fields_data = get_fields_data(model, fields)
+    subgathers = relation_subgathers(records, relational_data, variables=variables)
+    records = records.read(fields_names, load=False)
+
     data = []
     for rec in records:
-        tmp = {}
-        for key, value in rec.items():
-            model, fname, fields = fields_data.get(key, (None, ) * 3)
-            if model is not None:
-                for f in fields:
-                    fname = f.alias and f.alias.value or f.name.value
-                    subdata = value
-                    if f.selection_set:
-                        subdata = parse_model_field(
-                            model, f,
-                            variables=variables,
-                            ids=value,
-                        )
-                    tmp[fname] = subdata
-            elif fields:
-                for f in fields:
-                    tmp[fname] = value
-            else:
-                tmp[key] = value  # e.g.: id is gathered even if not requested
+        tmp = {"id": rec["id"]}
+        for fname, aliases in fields_data:
+            for alias in aliases:
+                tmp[alias] = rec[fname]
+
+        for fname, aliases in subgathers.items():
+            ids = rec[fname]
+            for alias, subgather in aliases:
+                tmp[alias] = subgather(ids)
         data.append(tmp)
-    if data and isinstance(ids, int):
-        data = data[0]
     return data
 
 
 def get_fields_data(model, fields):
     relations = {}
+    basic_fields = {}
     for field in fields:
         name = field.name.value
         f = model._fields[name]
-        r = relations.setdefault(
-            name,
-            (
-                model.env[f.comodel_name] if f.relational else None,
+        if f.relational:
+            r = relations.setdefault(
                 name,
-                [],
+                (
+                    model.env[f.comodel_name],
+                    name,
+                    [],
+                ),
             )
-        )
-        r[2].append(field)
-    return relations.values()
+            r[2].append(field)
+        else:
+            r = basic_fields.setdefault(
+                name,
+                (
+                    name,
+                    [],
+                ),
+            )
+            r[1].append(field.alias and field.alias.value or field.name.value)
+
+    return relations.values(), basic_fields.values()
 
 
-OPTIONS = [
-    ("offset", int),
-    ("limit", int),
-    ("order", str)
-]
+OPTIONS = [("offset", int), ("limit", int), ("order", str)]
 
 
 # https://stackoverflow.com/questions/45674423/how-to-filter-greater-than-in-graphql
 def parse_arguments(args, variables={}):  # return a domain and kwargs
-    args = {
-        a.name.value: value2py(a.value, variables)
-        for a in args
-    }
+    args = {a.name.value: value2py(a.value, variables) for a in args}
     kwargs = {}
     for opt, cast in OPTIONS:
         value = args.pop(opt, None)
@@ -169,10 +188,7 @@ def value2py(value, variables={}):
         return variables.get(value.name.value)
     if isinstance(value, ValueNode):
         if isinstance(value, ListValueNode):
-            return [
-                value2py(v, variables=variables)
-                for v in value.values
-            ]
+            return [value2py(v, variables=variables) for v in value.values]
         # For unknown reason, integers and floats are received as string,
         # but not booleans nor list
         if isinstance(value, IntValueNode):
@@ -180,83 +196,5 @@ def value2py(value, variables={}):
         if isinstance(value, FloatValueNode):
             return float(value.value)
         return value.value
-        
+
     raise Exception("Can not convert")
-
-def make_domain(domain, ids):
-    if ids:
-        if isinstance(ids, (list, tuple)):
-            domain = AND([
-                [("id", "in", ids)],
-                domain
-            ])
-        elif isinstance(ids, int):
-            domain = AND([
-                [("id", "=", ids)],
-                domain
-            ])
-    return domain
-
-
-def do_nothing(value):
-    return value
-
-
-def get_aliases(submodel, fields, variables={}):
-    aliases = []
-    if submodel is not None:
-        # If relational field, we want to get the subdatas
-        for f in fields:
-            alias = f.alias and f.alias.value or f.name.value
-            subgather = do_nothing  # If no subdata requested, return the ids
-            if f.selection_set:
-                subgather = convert_model_field(
-                    submodel, f,
-                    variables=variables
-                )
-            aliases.append(
-                (alias, subgather)
-            )
-    else:
-        for f in fields:
-            alias = f.alias and f.alias.value or f.name.value
-            aliases.append(
-                (alias, do_nothing)
-            )
-    return aliases
-
-def get_subgathers(fields_data, variables={}):
-    subgathers = {}
-    for submodel, fname, fields in fields_data:
-        aliases = get_aliases(submodel, fields, variables=variables)
-        if aliases:
-            subgathers[fname] = aliases
-    return subgathers
-
-def convert_model_field(model, field, variables={}):
-    domain, kwargs = parse_arguments(field.arguments, variables)
-    fields = field.selection_set.selections
-    fields_names = [f.name.value for f in fields]
-    fields_data = get_fields_data(model, fields)  # [(model, fname, fields), ...]
-
-    subgathers = get_subgathers(fields_data, variables=variables)
-
-    def gather(ids=None):
-        records = model.search(
-            make_domain(domain, ids), **kwargs
-        )
-        records = records.read(fields_names, load=False)
-        data = []
-        for rec in records:
-            tmp = {}
-            for key, value in rec.items():
-                aliases = subgathers.get(key, [])
-                for alias, func in aliases:
-                    tmp[alias] = func(value)
-            data.append(tmp)
-        
-        if data and isinstance(ids, int):
-            data = data[0]
-        return data
-
-    return gather

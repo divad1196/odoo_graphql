@@ -26,7 +26,7 @@
         async function getTickets(variables) {
             return odoo.graphql(`
                 query Tickets {
-                    HelpdeskTicket(limit: $limit) {	
+                    HelpdeskTicket(domain: $domain, limit: $limit) {	
                         name
                         user: user_id @include(if: $user_info) {
                             name
@@ -41,7 +41,7 @@
                         }
                     }
                 }`,
-                Object.assign({}, {user_info: true, limit: 400, partner_id: false}, variables)
+                Object.assign({}, {domain: [], user_info: true, partner_id: false}, variables)
             );
         };
         /*

@@ -59,52 +59,6 @@ function graphqlbuilder(url) {
     return graphql;
 }
 
-/* Needs to keep uid and password
-function build_odoo_rpc(url, database) {
-    function raw_rpc(model, method, args=[], kwargs={}) {
-        headers = new Headers({
-            'Content-Type': 'application/json'
-        });
-        parameters = {
-            method: 'POST',
-            headers: headers,
-            mode: 'cors',  // https://developer.mozilla.org/en-US/docs/Web/API/Request/mode
-            // referrerPolicy: "strict-origin-when-cross-origin", // no-referrer
-            cache: 'default',
-            body: JSON.stringify({
-                "jsonrpc": "2.0",
-                "id": null,
-                "method": "call",
-                "params": {
-                    "service": "object",
-                    "method": "execute_kw",
-                    "args": [
-                        database,
-                        1,
-                        "",
-                        model,
-                        method,
-                        args,
-                        kwargs
-                    ],
-                }
-            })
-        };
-        return fetch(url, parameters);
-    }
-    async function rpc(model, method, args=[], kwargs={}) {
-        return await raw_rpc(model, method, args, kwargs).then(async (response) => {
-            let data = await response.json();
-            if(data.error) {
-                throw data.error;
-            }
-            return data.result;
-        })
-    }
-    return rpc;
-}
-*/
-
 function odoo_builder(url, database) {
     return {
         login: (login, password) => {
@@ -112,6 +66,5 @@ function odoo_builder(url, database) {
         },
         logout: () => {return odoo_logout(url + "/web/session/destroy");},
         graphql: graphqlbuilder(url + '/graphql'),
-        // rpc: build_odoo_rpc(url + "/jsonrpc", database)
     }
 }
