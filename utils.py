@@ -202,41 +202,50 @@ def do_nothing(value):
     return value
 
 
+def get_aliases(submodel, fields, variables={}):
+    aliases = []
+    if submodel is not None:
+        # If relational field, we want to get the subdatas
+        for f in fields:
+            alias = f.alias and f.alias.value or f.name.value
+            subgather = do_nothing  # If no subdata requested, return the ids
+            if f.selection_set:
+                subgather = convert_model_field(
+                    submodel, f,
+                    variables=variables
+                )
+            aliases.append(
+                (alias, subgather)
+            )
+    else:
+        for f in fields:
+            alias = f.alias and f.alias.value or f.name.value
+            aliases.append(
+                (alias, do_nothing)
+            )
+    return aliases
+
+def get_subgathers(fields_data, variables={}):
+    subgathers = {}
+    for submodel, fname, fields in fields_data:
+        aliases = get_aliases(submodel, fields, variables=variables)
+        if aliases:
+            subgathers[fname] = aliases
+    return subgathers
+
 def convert_model_field(model, field, variables={}):
     domain, kwargs = parse_arguments(field.arguments, variables)
     fields = field.selection_set.selections
     fields_names = [f.name.value for f in fields]
     fields_data = get_fields_data(model, fields)  # [(model, fname, fields), ...]
 
-    subgathers = {}
-    for submodel, fname, fields in fields_data:
-        aliases = []
-        if submodel is not None:
-            # If relational field, we want to get the subdatas
-            for f in fields:
-                alias = f.alias and f.alias.value or f.name.value
-                subgather = do_nothing  # If no subdata requested, return the ids
-                if f.selection_set:
-                    subgather = convert_model_field(
-                        submodel, f,
-                        variables=variables
-                    )
-                aliases.append(
-                    (alias, subgather)
-                )
-        else:
-            for f in fields:
-                alias = f.alias and f.alias.value or f.name.value
-                aliases.append(
-                    (alias, do_nothing)
-                )
-        if aliases:
-            subgathers[fname] = aliases
+    subgathers = get_subgathers(fields_data, variables=variables)
 
     def gather(ids=None):
         records = model.search(
             make_domain(domain, ids), **kwargs
-        ).read(fields_names, load=False)
+        )
+        records = records.read(fields_names, load=False)
         data = []
         for rec in records:
             tmp = {}
