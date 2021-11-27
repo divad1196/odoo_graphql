@@ -7,8 +7,6 @@
     "category": "Extra Tools",
     "license": "OPL-1",
     "summary": "Allow to use GraphQL with Odoo",
-    "description": """
-""",
     "depends": [
         "base",
     ],
