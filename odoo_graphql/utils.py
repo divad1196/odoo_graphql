@@ -18,6 +18,7 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+
 def model2name(model):
     return "".join(p.title() for p in model.split("."))
 
@@ -50,10 +51,16 @@ def get_definition(doc, operation=None):
     return doc.definitions[0]  # Or raise an Exception?
 
 
-def handle_graphql(env, doc, variables={}, operation=None):
+def handle_graphql(env, doc, variables={}, operation=None, allowed_fields={}):
     response = {}
     try:
-        data = parse_document(env, doc, variables=variables, operation=operation)
+        data = parse_document(
+            env,
+            doc,
+            variables=variables,
+            operation=operation,
+            allowed_fields=allowed_fields,
+        )
         response["data"] = data
     except Exception as e:
         _logger.critical(e)
@@ -62,15 +69,16 @@ def handle_graphql(env, doc, variables={}, operation=None):
     return response
 
 
-def parse_document(env, doc, variables={}, operation=None):
+def parse_document(env, doc, variables={}, operation=None, allowed_fields={}):
     if isinstance(doc, str):
         doc = parse(doc)
     # Un document peut avoir plusieurs définitions
-    variables = {**env.context, **variables}
     model_mapping = get_model_mapping(env)
 
     definition = get_definition(doc, operation=operation)
-    return parse_definition(definition, model_mapping, variables=variables)
+    return parse_definition(
+        definition, model_mapping, variables=variables, allowed_fields=allowed_fields
+    )
 
 
 def parse_directives(directives, variables={}):
@@ -89,7 +97,9 @@ def parse_directives(directives, variables={}):
     return True  # Keep by default
 
 
-def _parse_definition(definition, model_mapping, variables={}, mutation=False):
+def _parse_definition(
+    definition, model_mapping, variables={}, mutation=False, allowed_fields={}
+):
     data = {}
     for field in definition.selection_set.selections:
         model = model_mapping[field.name.value]
@@ -99,11 +109,12 @@ def _parse_definition(definition, model_mapping, variables={}, mutation=False):
             field,
             variables=variables,
             mutation=mutation,
+            allowed_fields=allowed_fields,
         )
     return data
 
 
-def parse_definition(definition, model_mapping, variables={}):
+def parse_definition(definition, model_mapping, variables={}, allowed_fields={}):
     dtype = definition.operation.value  # MUTATION OR QUERY
     if dtype not in ("query", "mutation"):
         return None
@@ -115,6 +126,7 @@ def parse_definition(definition, model_mapping, variables={}):
         model_mapping=model_mapping,
         variables=variables,
         mutation=mutation,
+        allowed_fields=allowed_fields,
     )
 
 
@@ -141,10 +153,9 @@ def relation_subgathers(records, relational_data, variables={}):
                 # The order is lost.
                 res = [
                     d
-                    for _, d
-                    in sorted(
+                    for _, d in sorted(
                         (d for d in (data.get(rec_id) for rec_id in ids) if d),
-                        key=lambda t: t[0]
+                        key=lambda t: t[0],
                     )
                 ]
                 return res
@@ -183,7 +194,9 @@ def retrieve_records(model, field, variables={}, ids=None, mutation=False):
 
 # Nb: il y a 2 niveau de champs, les racines et ceux dessous
 # => on doit parfois récupérer un model, parfois un champs
-def parse_model_field(model, field, variables={}, ids=None, mutation=False):
+def parse_model_field(
+    model, field, variables={}, ids=None, mutation=False, allowed_fields={}
+):
     records = retrieve_records(
         model,
         field,
@@ -192,6 +205,9 @@ def parse_model_field(model, field, variables={}, ids=None, mutation=False):
         mutation=mutation,
     )
     fields = field.selection_set.selections
+    allowed = allowed_fields.get(model._name)
+    if allowed is not None:
+        fields = [f for f in fields if f in allowed]
     fields_names = [f.name.value for f in fields]
     # TODO: Add hook to filter available fields per models?
     # filter_authorized_fields(model, fields)
@@ -275,8 +291,9 @@ def value2py(value, variables={}):
             return dict(
                 (
                     value2py(f.name, variables=variables),
-                    value2py(f.value, variables=variables)
-                ) for f in value.fields  # list of ObjectFieldNode
+                    value2py(f.value, variables=variables),
+                )
+                for f in value.fields  # list of ObjectFieldNode
             )
         # For unknown reason, integers and floats are received as string,
         # but not booleans nor list
@@ -286,4 +303,3 @@ def value2py(value, variables={}):
             return float(value.value)
         raise Exception("Can not convert")
     return value.value
-

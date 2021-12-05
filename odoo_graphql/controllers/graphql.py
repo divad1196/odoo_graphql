@@ -25,7 +25,20 @@ class GraphQL(http.Controller):
         except Exception:
             pass
 
+        allowed_fields = self.get_allowed_fields()
+        variables = {**self.env.context, **variables}
         response = handle_graphql(
-            request.env, query, variables=variables, operation=operation
+            request.env,
+            query,
+            variables=variables,
+            operation=operation,
+            allowed_fields=allowed_fields,
         )
         return json.dumps(response)
+
+    def get_allowed_fields(self):
+        # Return a dictionnary containing for each model
+        # a list of fields allowed for the current user
+        # None allows all fields,
+        # Empty list allows no field.
+        return {}
