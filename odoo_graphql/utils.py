@@ -51,12 +51,12 @@ def get_definition(doc, operation=None):
     return doc.definitions[0]  # Or raise an Exception?
 
 
-def handle_graphql(env, doc, variables={}, operation=None, allowed_fields={}):
+def handle_graphql(doc, model_mapping, variables={}, operation=None, allowed_fields={}):
     response = {}
     try:
         data = parse_document(
-            env,
             doc,
+            model_mapping,
             variables=variables,
             operation=operation,
             allowed_fields=allowed_fields,
@@ -69,12 +69,11 @@ def handle_graphql(env, doc, variables={}, operation=None, allowed_fields={}):
     return response
 
 
-def parse_document(env, doc, variables={}, operation=None, allowed_fields={}):
+def parse_document(doc, model_mapping, variables={}, operation=None, allowed_fields={}):
     if isinstance(doc, str):
         doc = parse(doc)
-    # Un document peut avoir plusieurs définitions
-    model_mapping = get_model_mapping(env)
 
+    # A document can have many definitions
     definition = get_definition(doc, operation=operation)
     return parse_definition(
         definition, model_mapping, variables=variables, allowed_fields=allowed_fields
@@ -207,10 +206,12 @@ def parse_model_field(
     fields = field.selection_set.selections
     allowed = allowed_fields.get(model._name)
     if allowed is not None:
-        fields = [f for f in fields if f in allowed]
+        fields = [f for f in fields if f.name.value in allowed]
+        if not fields:
+            return [
+                {"id": rid} for rid in records.ids
+            ]
     fields_names = [f.name.value for f in fields]
-    # TODO: Add hook to filter available fields per models?
-    # filter_authorized_fields(model, fields)
 
     # Get datas
     relational_data, fields_data = get_fields_data(model, fields)
@@ -301,5 +302,4 @@ def value2py(value, variables={}):
             return int(value.value)
         if isinstance(value, FloatValueNode):
             return float(value.value)
-        raise Exception("Can not convert")
     return value.value

@@ -1,7 +1,7 @@
 from odoo import http
 from odoo.http import request
 import json
-from ..utils import handle_graphql
+from ..utils import handle_graphql, get_model_mapping
 
 import logging
 
@@ -25,11 +25,14 @@ class GraphQL(http.Controller):
         except Exception:
             pass
 
+        model_mapping = self.get_model_mapping()
         allowed_fields = self.get_allowed_fields()
-        variables = {**self.env.context, **variables}
+        extra_variables = self.get_extra_variables()
+        variables = {**extra_variables, **variables}
+
         response = handle_graphql(
-            request.env,
             query,
+            model_mapping,
             variables=variables,
             operation=operation,
             allowed_fields=allowed_fields,
@@ -41,4 +44,10 @@ class GraphQL(http.Controller):
         # a list of fields allowed for the current user
         # None allows all fields,
         # Empty list allows no field.
-        return {}
+        return {"helpdesk.ticket": []}
+
+    def get_model_mapping(self):
+        return get_model_mapping(request.env)
+
+    def get_extra_variables(self):
+        return request.env.context
