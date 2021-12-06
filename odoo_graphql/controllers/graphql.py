@@ -44,7 +44,8 @@ class GraphQL(http.Controller):
         # a list of fields allowed for the current user
         # None allows all fields,
         # Empty list allows no field.
-        return {"helpdesk.ticket": []}
+        # e.g.: {"helpdesk.ticket": []}
+        return {}
 
     def get_model_mapping(self):
         return get_model_mapping(request.env)
