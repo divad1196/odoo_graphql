@@ -114,8 +114,8 @@ def _parse_definition(
 
 
 def parse_definition(definition, model_mapping, variables={}, allowed_fields={}):
-    dtype = definition.operation.value  # MUTATION OR QUERY
-    if dtype not in ("query", "mutation"):
+    dtype = definition.operation.value      # MUTATION OR QUERY
+    if dtype not in ("query", "mutation"):  # does not support other types currentyl
         return None
 
     filter_by_directives(definition, variables)
@@ -135,6 +135,7 @@ def relation_subgathers(records, relational_data, variables={}):
         sub_records_ids = records.mapped(fname).ids
         aliases = []
         for f in fields:
+            # Nb: Even if its the same field, the domain may change
             alias = f.alias and f.alias.value or f.name.value
             tmp = parse_model_field(
                 submodel, f, variables=variables, ids=sub_records_ids
@@ -148,8 +149,8 @@ def relation_subgathers(records, relational_data, variables={}):
                 # We may not receive all ids since records may be archived
                 if isinstance(ids, int):
                     return data.get(ids)
-                # Since are gather the data in batch, then dispatching,
-                # The order is lost.
+                # Since the data are gathered in batch, then dispatching,
+                # The order is lost and must be done again.
                 res = [
                     d
                     for _, d in sorted(
@@ -190,9 +191,7 @@ def retrieve_records(model, field, variables={}, ids=None, mutation=False):
 
     return records
 
-
-# Nb: il y a 2 niveau de champs, les racines et ceux dessous
-# => on doit parfois récupérer un model, parfois un champs
+# Nb: the parameter "ids" is useful for relational fields
 def parse_model_field(
     model, field, variables={}, ids=None, mutation=False, allowed_fields={}
 ):
