@@ -81,7 +81,7 @@ You will then need to allow many parameters to be able to fetch your Odoo.
 If you have an url authorizing your website, you may want to use the library provided in this module **graphql.js**
 
 ```javascript
-const odoo = odoo_builder(myurl, "open-net-test");  // Nb: myurl is a string
+const odoo = odoo_builder(myurl, "mydatabase");  // Nb: myurl is a string
 
 // it provides you with a simple way to login/logout and to retrieve your sessions information
 let session = await odoo.login(login, password);
