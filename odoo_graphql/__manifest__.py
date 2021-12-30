@@ -5,9 +5,7 @@
     "version": "1.0",
     "author": "Gallay David",
     "category": "Extra Tools",
-    "license": "OPL-1",
-    "price": 50,
-    "currency": "EUR",
+    "license": "LGPL-3",
     "summary": "Allow to use GraphQL with Odoo",
     "depends": [
         "base",
