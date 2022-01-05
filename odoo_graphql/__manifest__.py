@@ -6,6 +6,7 @@
     "author": "Gallay David",
     "category": "Extra Tools",
     "license": "LGPL-3",
+    "website": "https://github.com/divad1196/odoo_graphql",
     "summary": "Allow to use GraphQL with Odoo",
     "depends": [
         "base",

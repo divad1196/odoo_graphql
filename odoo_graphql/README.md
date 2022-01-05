@@ -32,7 +32,8 @@ To use the query:
 
 ```python
 requests.get("https://myodoo.com/graphql",
-    # headers={"Content-type": "application/graphql"},  # Not required currently but recommended
+    # Header not required currently but recommended
+    headers={"Content-type": "application/graphql"},  
     data={
         "query": myquery,
         "variables": {},  # Optional
@@ -40,6 +41,16 @@ requests.get("https://myodoo.com/graphql",
         "operationName": None  # Optional, used for multi-operation document
 	},
 )
+```
+
+```javascript
+await fetch("/graphql", {
+    method: "POST",
+    body: JSON.stringify({
+        query: myquery,
+        variables: myvariables,
+    }),
+}).then((res) => res.json());
 ```
 
 
@@ -64,6 +75,15 @@ It will:
 
 This can be used in the same way in any other languages, as javascript.
 Be aware that this module **DOES NOT HANDLE CORS**, that means that without any other changes, you will only be able to make queries from the Odoo frontend in javascript, but not from an extenal website (see below for more informations).
+
+
+
+The route <strong>/graphql/schema</strong> will provide you with all the types you can query.
+Accessing this url through a web-browser will download the schema in a file.
+
+Nb: This feature is under development. The goal is to be compliant with a graphql edit as GraphiQL.
+In fact, this will list all the types (and their fields) you <strong>might</strong> be able to query, this refer to access rights and access rules of the user doing the query.
+For example, the public user (not authenticated) has by default not right over the products, but there is an access rule allowing him to access SOME products. But Odoo does not provide groups for most fields, that means anyone can query any field of a record they have access to. This issue exists from the beginning of Odoo, even without this module, one can easily get all fields of a record using the natives xmlrpc and jsonrpc.
 
 
 

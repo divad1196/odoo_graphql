@@ -20,7 +20,7 @@
       </div>
     </div>
     <div>
-      <h3>Use cases</h3>
+      <h2>Use cases</h2>
       <ul>
         <li>
           Use Odoo as your centralised database for your automations.<br>
@@ -36,8 +36,8 @@
         </li>
       </ul>
     </div>
-    <div>
-      <h3>What are the differences with other solutions?</h3>
+    <div class="mt-4">
+      <h2>What are the differences with other solutions?</h2>
       <ul>
         <li>
           <strong>Flat Learning curve</strong>: The GraphQL arguments are done in a way that any Odoo developer will feel at home.<br>
@@ -54,8 +54,8 @@
         </li>
       </ul>
     </div>
-    <div>
-      <h3>Security and Performance</h3>
+    <div class="mt-4">
+      <h2>Security and Performance</h2>
       <p>
         The security policy is the one already defined by Odoo.
         You cannot get more informations using GraphQL than you would using jsonrpc/xmlrpc.
@@ -67,16 +67,38 @@
         This module optimise the search, especially for multi-level queries.
       </p>
     </div>
-    <div>
-      <h3>Usage</h3>
-      <p>You can perfom queries</p>
-      <div><img alt="query" src="query.png" /></div>
-      <p>As well as mutations</p>
-      <div><img alt="mutations" src="mutations.png" /></div>
+    <div class="mt-4">
+      <h2>Usage</h2>
+      <p class="mt-4">
+        <h4>You can perfom queries</h4>
+        <div><img alt="query" src="query.png" /></div>
+      </p>
+      <p class="mt-4">
+        <h4>As well as mutations</h4>
+        <div><img alt="mutations" src="mutations.png" /></div>
+      </p>
 
-      <p>Using any languages (javascript, python, ...)</p>
-      <div><img alt="request" src="request.png" /></div>
+      <p class="mt-4">
+        <h4>Using any languages</h4>
+        <div>
+          <div>Python</div>
+          <div><img alt="request" src="request.png" /></div>
+        </div>
+        <div class="mt-3">
+          <div>Javascript</div>
+          <div><img alt="request" src="request_js.png" /></div>
+        </div>
+      </p>
     </div>
+
+    <p class="mt-4">
+      <h4>Need to know the available types? No worries!</h4>
+      The route <strong>/graphql/schema</strong> will provide you with all the types you can query.<br/>
+      Accessing this url through a web-browser will download the schema in a file.<br/>
+      <br/>
+      Nb: This feature is under development. The goal is to be compliant with a graphql edit as GraphiQL.<br/>
+    </p>
+  </div>
   </div>
 </section>
 
@@ -87,6 +109,9 @@
       <p>
         If you are facing any issue with this module, please feel free to contact me using this module support
         or on github (<a href="https://github.com/divad1196">https://github.com/divad1196</a>)
+      </p>
+      <p>
+        Also, feel free to leave a feedback in the comment and rate this module!
       </p>
     </div>
   </div>
