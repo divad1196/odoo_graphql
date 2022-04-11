@@ -12,6 +12,7 @@ from graphql.language.ast import (
     IntValueNode,
     FloatValueNode,
 )
+# import traceback
 
 import logging
 
@@ -58,7 +59,7 @@ def handle_graphql(doc, model_mapping, variables={}, operation=None, allowed_fie
     except Exception as e:
         _logger.critical(e)
         response["data"] = None
-        response["errors"] = {"message": str(e)}
+        response["errors"] = {"message": str(e)}  # + traceback.format_exc()
     return response
 
 
@@ -141,7 +142,7 @@ def relation_subgathers(records, relational_data, variables={}):
                     return None
                 # We may not receive all ids since records may be archived
                 if isinstance(ids, int):
-                    return data.get(ids)
+                    return data.get(ids)[1]
                 # Since the data are gathered in batch, then dispatching,
                 # The order is lost and must be done again.
                 res = [
@@ -201,7 +202,13 @@ def parse_model_field(
         ids=ids,
         mutation=mutation,
     )
-    fields = field.selection_set.selections
+
+    # User may have forgotten to define subfields
+    # We use an empty list to prevent it,
+    # Maybe we should rise an error here instead?
+    fields = []
+    if field.selection_set:
+        fields = field.selection_set.selections
     allowed = allowed_fields.get(model._name)
     if allowed is not None:
         fields = [f for f in fields if f.name.value in allowed]
