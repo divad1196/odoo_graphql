@@ -15,21 +15,7 @@ class GraphQL(http.Controller):
     def graphql(self):
         # https://spec.graphql.org/June2018/#sec-Response-Format
         query = request.httprequest.data.decode()  # request.graphqlrequest
-        variables = {}
-        operation = None
-        try:  # Usual format is json with "query" and "variables" entries
-            data = json.loads(query)
-            query = data["query"]
-            variables = data.get("variables", {})
-            operation = data.get("operationName")
-        except Exception:
-            pass
-
-        response = request.env["graphql.handler"].handle_graphql(
-            query,
-            variables=variables,
-            operation=operation,
-        )
+        response = request.env["graphql.handler"].handle_query(query)
         return json.dumps(response)
 
     @http.route(

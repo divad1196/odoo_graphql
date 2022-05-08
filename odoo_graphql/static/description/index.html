@@ -30,8 +30,8 @@
           If you want to create your own website on top of Odoo using the most modern framework as AngularJS, VueJS or ReactJs,<br>
           This module will provide you the simpliest and most efficient way to do your queries.<br>
           <br>
-          DISCLAIMER: To do your own website using Odoo, you will need to handle cors.<br>
-          More informations are provided on the readme when you buy the module, but you can already have the main informations here:
+          <span class="text-danger">DISCLAIMER:</span> To do your own website using Odoo, you will need to handle cors.<br>
+          More informations are provided on the readme when you download this module, but you can already have the main informations here:
           <a href="https://github.com/divad1196/odoo_nginx_proxy">https://github.com/divad1196/odoo_nginx_proxy</a>
         </li>
       </ul>
@@ -48,6 +48,9 @@
         <li>
           <strong>Maintainance</strong>: You don't want to duplicate your code, as Odoo Model AND GraphQL model.
           You also don't want to update your GraphQL models for each module you install.
+        </li>
+        <li>
+          <strong>Performance</strong>: By coding it yourself, you <span>MAY</span> have better performances, but you will <span>PROBABLY</span> have lower ones. The query processing is made as best as it can be by wrapping Odoo's ORM.
         </li>
         <li>
           <strong>Spare Time (and thus money)</strong>: You want to focus on the use of the data, not how you gather them.
@@ -89,6 +92,10 @@
           <div><img alt="request" src="request_js.png" /></div>
         </div>
       </p>
+      <p class="p-2 mt-4 bg-info rounded" style="font-size: 1.5rem;">
+        Examples are provided under the tests/ folder. Inside of which you will find a libs/ folder containing utilities for python and javascript.<br>
+        Please, take a look at it if you have any questions.
+      </p>
     </div>
 
     <p class="mt-4">
@@ -96,7 +103,7 @@
       The route <strong>/graphql/schema</strong> will provide you with all the types you can query.<br/>
       Accessing this url through a web-browser will download the schema in a file.<br/>
       <br/>
-      Nb: This feature is under development. The goal is to be compliant with a graphql edit as GraphiQL.<br/>
+      Nb: This feature is under development. The goal is to be compliant with a graphql editor as GraphiQL.<br/>
     </p>
   </div>
   </div>
@@ -107,8 +114,10 @@
     <div class="oe_span12">
       <h2 class="oe_slogan">Contact</h2>
       <p>
-        If you are facing any issue with this module, please feel free to contact me using this module support
-        or on github (<a href="https://github.com/divad1196">https://github.com/divad1196</a>)
+        If you are facing any issue with this module, you can contact me on
+        <span class="font-weight-bold" style="font-size: 1.5rem">github</span>
+        (<a href="https://github.com/divad1196/odoo_graphql/issues">https://github.com/divad1196/odoo_graphql/issues</a>)<br>
+        <span class="p-1 bg-warning rounded">Make sure that you have read the README file and checked the tests folder first.</span>
       </p>
       <p>
         Also, feel free to leave a feedback in the comment and rate this module!
