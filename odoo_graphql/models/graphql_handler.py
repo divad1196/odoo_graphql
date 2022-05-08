@@ -12,6 +12,44 @@ _logger = logging.getLogger(__name__)
 class GraphQLHandler(models.TransientModel):
     _name = "graphql.handler"
 
+    def handle_query(self, query):
+        if isinstance(query, bytes):
+            query = query.decode()
+        variables = {}
+        operation = None
+        try:  # Usual format is json with "query" and "variables" entries
+            data = json.loads(query)
+            query = data["query"]
+            variables = data.get("variables", {})
+            operation = data.get("operationName")
+            # An error when authenticating must be sent back
+            try:
+                auth = data.get("auth", {})
+                if auth:
+                    login = auth.get("login")
+                    password = auth.get("password")
+                    if login and password:
+                        uid = self.env["res.users"].authenticate(
+                            self.env.cr.dbname,
+                            login, password,
+                            self.env
+                        )
+                        self = self.with_user(uid)
+            except Exception as e:
+                return {
+                    "errors": {"message": str(e)}  # + traceback.format_exc()
+                }
+        except Exception:  # We may have pure graphql query
+            pass
+
+        response = self.handle_graphql(
+            query,
+            variables=variables,
+            operation=operation,
+        )
+        return response
+
+
     def _handle_graphql(
         self,
         query,

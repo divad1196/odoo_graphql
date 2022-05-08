@@ -1,5 +1,10 @@
-from libs.graphql import Graphql
+"""
+    Basique graphql usage (authentication made using stored cookies)
+"""
+
 import json
+from libs.graphql import Graphql
+
 
 graphql = Graphql("http://localhost:8069", "graphql")
 graphql.login("admin", "admin")

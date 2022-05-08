@@ -87,6 +87,12 @@ For example, the public user (not authenticated) has by default not right over t
 
 
 
+### Usage and examples
+
+You can find examples under the `tests` folder. Inside it you will find utilities file for javascript and python. Please, take a look at those files first.
+
+
+
 ## External Website
 
 You may want to create a custom website for your Odoo using modern technolgies as VueJS, ReactJS, ...
