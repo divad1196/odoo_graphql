@@ -60,14 +60,19 @@
     <div class="mt-4">
       <h2>Security and Performance</h2>
       <p>
-        The security policy is the one already defined by Odoo.
-        You cannot get more informations using GraphQL than you would using jsonrpc/xmlrpc.
-        (This module will be extendend with a per-fields access policy in a near future, but as long as RPC is allowed, this won't be any game-changer in term of security)
+        <h3>Access and permissions</h3>
+        The security policy is the one already defined by Odoo.<br/>
+        You <span class="font-weight-bold">CANNOT</span> get more informations using GraphQL than you would using jsonrpc/xmlrpc.<br/>
+        (This module will be extendend with a per-fields access policy in the future, but as long as RPC is allowed, this won't be any game-changer in term of security)<br/>
         Those security policies must not be by-passed, which may be done by a developer for any (bad) reason.
       </p>
       <p>
-        The security policies in Odoo add an overhead on each requests.
+        The security policies in Odoo add an overhead on each requests.<br/>
         This module optimise the search, especially for multi-level queries.
+      </p>
+      <p>
+        <h3>CRSF Protection</h3>
+        TODO
       </p>
     </div>
     <div class="mt-4">
