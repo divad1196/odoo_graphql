@@ -66,6 +66,50 @@ This can be used in the same way in any other languages, as javascript.
 Be aware that this module **DOES NOT HANDLE CORS**, that means that without any other changes, you will only be able to make queries from the Odoo frontend in javascript, but not from an extenal website (see below for more informations).
 
 
+### Examples of GraphQL mutations
+
+##### Example query insert:
+
+```graphql
+mutation InsertResPartnerTitles {
+    insertResPartnerTitles: ResPartnerTitle(
+        vals: {
+            name: "title 1",
+            shortcut: "t1",
+        }
+    )
+    {
+        id
+        name
+        shortcut
+    }
+}
+```
+
+##### Example query update:
+```graphql
+mutation UpdateResPartnerTitle {
+    updateResPartnerTitle: ResPartnerTitle(
+        domain: $domain,
+                 vals: {
+                            shortcut: "t 1",
+                       })
+    {
+        id
+        name
+        shortcut
+    }
+}
+```
+
+##### Example query delete:
+```graphql
+mutation UpdateResPartnerTitle {
+    deleteResPartnerTitle: ResPartnerTitle(
+        domain: $domain)
+}
+```
+
 
 ## External Website
 

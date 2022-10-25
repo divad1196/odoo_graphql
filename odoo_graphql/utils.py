@@ -96,10 +96,11 @@ def _parse_definition(
     data = {}
     for field in definition.selection_set.selections:
         model = model_mapping[field.name.value]
-        fname = field.alias and field.alias.value or field.name.value
+        fname = field.alias.value if field.alias else field.name.value
         data[fname] = parse_model_field(
             model,
             field,
+            fname,
             variables=variables,
             mutation=mutation,
             allowed_fields=allowed_fields,
@@ -170,7 +171,7 @@ def make_domain(domain, ids):
 
 
 # TODO: make it possible to define custom create/write handlers per models
-def retrieve_records(model, field, variables={}, ids=None, mutation=False):
+def retrieve_records(model, field, fname, variables={}, ids=None, mutation=False):
     domain, kwargs, vals = parse_arguments(field.arguments, variables)
     if mutation and domain is None:  # Create
         try:
@@ -186,18 +187,35 @@ def retrieve_records(model, field, variables={}, ids=None, mutation=False):
     domain = make_domain(domain or [], ids)
     records = model.search(domain, **kwargs)
 
-    if mutation:  # Write
-        records.write(vals)
+    if mutation:
+        if _is_delete_mutation(fname):
+            model.sudo().search(domain).unlink()
+
+        elif _is_insert_or_update_mutation(fname):
+            records.write(vals)
+
+        else:
+            raise ValidationError('Undefined operation type of mutation.')
 
     return records
 
+
+def _is_delete_mutation(fname):
+    return fname.startswith('delete')
+
+
+def _is_insert_or_update_mutation(fname):
+    return fname.startswith('insert') or fname.startswith('update')
+
+
 # Nb: the parameter "ids" is useful for relational fields
 def parse_model_field(
-    model, field, variables={}, ids=None, mutation=False, allowed_fields={}
+    model, field, fname, variables={}, ids=None, mutation=False, allowed_fields={}
 ):
     records = retrieve_records(
         model,
         field,
+        fname,
         variables=variables,
         ids=ids,
         mutation=mutation,
