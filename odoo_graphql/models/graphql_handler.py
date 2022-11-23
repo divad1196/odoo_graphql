@@ -58,7 +58,9 @@ class GraphQLHandler(models.TransientModel):
         operation=None,
         allowed_fields={},
     ):
+        # This is the function from ..utils.py file
         return handle_graphql(
+            self.env,
             query,
             model_mapping,
             variables=variables,
@@ -124,7 +126,7 @@ class GraphQLHandler(models.TransientModel):
         )
 
         model_access = model_by_rights | model_by_rules
-
+        # tools.ormcache can not store records directly, we will only store their names
         return ir_model_ids.mapped("model")
 
     def get_allowed_models(self, mode="read"):

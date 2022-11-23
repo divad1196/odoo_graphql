@@ -1,5 +1,10 @@
 # TODO
 
+* Clean up fragments usage
+* Introspection
+
+
+
 
 
 * Support for mutations

@@ -11,7 +11,9 @@
     "depends": [
         "base",
     ],
-    "data": [],
+    "data": [
+        "templates/graphiql.xml",
+    ],
     "external_dependencies": {
         "python": ["graphql-core"],
     },

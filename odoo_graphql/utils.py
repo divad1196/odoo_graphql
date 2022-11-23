@@ -11,8 +11,9 @@ from graphql.language.ast import (
     ListValueNode,
     IntValueNode,
     FloatValueNode,
+    FragmentSpreadNode,
 )
-# import traceback
+from .introspection import handle_introspection
 
 import logging
 
@@ -24,8 +25,17 @@ def model2name(model):
 
 
 def filter_by_directives(node, variables={}):
+    if isinstance(node, FragmentSpreadNode):
+        # E.g. __schema
+        # TODO: Handle fragments
+        print("?" * 80)
+        print(node.keys)
+        print(node.name.value)
+        print(node.directives)
+        return
     if not node.selection_set:
         return
+    # Replace selections by a more convenient list
     selections = []
     for field in node.selection_set.selections:
         if parse_directives(field.directives, variables=variables):
@@ -35,20 +45,22 @@ def filter_by_directives(node, variables={}):
 
 
 def get_definition(doc, operation=None):
-    if operation is None or len(doc.definitions) == 1:
-        return doc.definitions[0]
-    for definition in doc.definitions:
+    definitions = [d for d in doc.definitions if "operation" in d.keys]
+    if operation is None or len(definitions) == 1:
+        return definitions[0]
+    for definition in definitions:
         # https://dgraph.io/docs/graphql/api/multiples/#multiple-operations
         # https://github.com/graphql/graphql-spec/issues/29
         if definition.name.value == operation:
             return definition
-    return doc.definitions[0]  # Or raise an Exception?
+    return definitions[0]  # Or raise an Exception?
 
 
-def handle_graphql(doc, model_mapping, variables={}, operation=None, allowed_fields={}):
+def handle_graphql(env, doc, model_mapping, variables={}, operation=None, allowed_fields={}):
     response = {}
     try:
         data = parse_document(
+            env, 
             doc,
             model_mapping,
             variables=variables,
@@ -57,22 +69,36 @@ def handle_graphql(doc, model_mapping, variables={}, operation=None, allowed_fie
         )
         response["data"] = data
     except Exception as e:
+        raise e  # TODO: Remove on production
         _logger.critical(e)
         response["data"] = None
         response["errors"] = {"message": str(e)}  # + traceback.format_exc()
     return response
 
 
-def parse_document(doc, model_mapping, variables={}, operation=None, allowed_fields={}):
+def parse_document(env, doc, model_mapping, variables={}, operation=None, allowed_fields={}):
     if isinstance(doc, str):
         doc = parse(doc)
-
     # A document can have many definitions
     definition = get_definition(doc, operation=operation)
+    fragments = parse_fragments(doc)
     return parse_definition(
-        definition, model_mapping, variables=variables, allowed_fields=allowed_fields
+        env, definition, model_mapping,
+        variables=variables,
+        allowed_fields=allowed_fields,
+        fragments=fragments,
     )
 
+
+def parse_fragments(doc):
+    fragments = {}
+    for d in doc.definitions:
+        if "type_condition" in d.keys:
+            print("---")
+            print(d.name.value)
+            print(d.type_condition.name.value)
+            fragments[d.name.value] = d
+    return fragments
 
 def parse_directives(directives, variables={}):
     """Currently return True to keep, False to skip"""
@@ -91,39 +117,52 @@ def parse_directives(directives, variables={}):
 
 
 def _parse_definition(
-    definition, model_mapping, variables={}, mutation=False, allowed_fields={}
+    env,
+    definition, model_mapping, variables, mutation, allowed_fields, fragments,
 ):
     data = {}
     for field in definition.selection_set.selections:
-        model = model_mapping[field.name.value]
         fname = field.alias and field.alias.value or field.name.value
+        res = handle_introspection(env, model_mapping, fragments, field)
+        if res is not None:
+            data[fname] = res
+            continue
+        model = model_mapping[field.name.value]
         data[fname] = parse_model_field(
             model,
             field,
-            variables=variables,
+            variables,
             mutation=mutation,
             allowed_fields=allowed_fields,
         )
     return data
 
 
-def parse_definition(definition, model_mapping, variables={}, allowed_fields={}):
+def parse_definition(env, definition, model_mapping, variables=None, allowed_fields=None, fragments=None):
+    if variables is None:
+        variables = {}
+    if allowed_fields is None:
+        allowed_fields = {}
+    if fragments is None:
+        fragments = {}
     dtype = definition.operation.value      # MUTATION OR QUERY
-    if dtype not in ("query", "mutation"):  # does not support other types currentyl
+    if dtype not in ("query", "mutation"):  # does not support other types currently
         return None
 
     filter_by_directives(definition, variables)
     mutation = dtype == "mutation"
     return _parse_definition(
+        env,
         definition,
-        model_mapping=model_mapping,
-        variables=variables,
-        mutation=mutation,
-        allowed_fields=allowed_fields,
+        model_mapping,
+        variables,
+        mutation,
+        allowed_fields,
+        fragments
     )
 
 
-def relation_subgathers(records, relational_data, variables={}):
+def relation_subgathers(records, relational_data, variables):
     subgathers = {}
     for submodel, fname, fields in relational_data:
         sub_records_ids = records.mapped(fname).ids
@@ -132,7 +171,7 @@ def relation_subgathers(records, relational_data, variables={}):
             # Nb: Even if its the same field, the domain may change
             alias = f.alias and f.alias.value or f.name.value
             tmp = parse_model_field(
-                submodel, f, variables=variables, ids=sub_records_ids
+                submodel, f, variables, ids=sub_records_ids
             )
             data = {d["id"]: (i, d) for i, d in enumerate(tmp)}
 
@@ -170,7 +209,7 @@ def make_domain(domain, ids):
 
 
 # TODO: make it possible to define custom create/write handlers per models
-def retrieve_records(model, field, variables={}, ids=None, mutation=False):
+def retrieve_records(model, field, variables, ids=None, mutation=False):
     domain, kwargs, vals = parse_arguments(field.arguments, variables)
     if mutation and domain is None:  # Create
         try:
@@ -193,8 +232,12 @@ def retrieve_records(model, field, variables={}, ids=None, mutation=False):
 
 # Nb: the parameter "ids" is useful for relational fields
 def parse_model_field(
-    model, field, variables={}, ids=None, mutation=False, allowed_fields={}
+    model, field, variables, ids=None, mutation=False, allowed_fields=None
 ):
+    if variables is None:
+        variables = {}
+    if allowed_fields is None:
+        allowed_fields = {}
     records = retrieve_records(
         model,
         field,
@@ -220,7 +263,7 @@ def parse_model_field(
 
     # Get datas
     relational_data, fields_data = get_fields_data(model, fields)
-    subgathers = relation_subgathers(records, relational_data, variables=variables)
+    subgathers = relation_subgathers(records, relational_data, variables)
     records = records.read(fields_names, load=False)
 
     data = []
@@ -275,7 +318,9 @@ OPTIONS = [("offset", int), ("limit", int), ("order", str)]
 
 # TODO: Add a hook to filter vals?
 # https://stackoverflow.com/questions/45674423/how-to-filter-greater-than-in-graphql
-def parse_arguments(args, variables={}):  # return a domain and kwargs
+def parse_arguments(args, variables=None):  # return a domain and kwargs
+    if variables is None:
+        variables = {}
     args = {a.name.value: value2py(a.value, variables) for a in args}
     domain = args.pop("domain", None)
     kwargs = {}
@@ -287,7 +332,9 @@ def parse_arguments(args, variables={}):  # return a domain and kwargs
     return domain, kwargs, vals
 
 
-def value2py(value, variables={}):
+def value2py(value, variables=None):
+    if variables is None:
+        variables = {}
     if isinstance(value, VariableNode):
         return variables.get(value.name.value)
     if isinstance(value, ValueNode):
