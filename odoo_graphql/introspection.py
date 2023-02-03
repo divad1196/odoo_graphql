@@ -21,8 +21,6 @@ def handle_introspection(env, model_mapping, field):
     if not ttype.startswith("__"):
         return None
     ttype = ttype.lower()
-    if ttype == "__schema":
-        return handle_schema(env, model_mapping, field)
     if ttype == "__type":
         return handle_type(env)
     if ttype == "__typekind":
@@ -35,6 +33,8 @@ def handle_introspection(env, model_mapping, field):
         return handle_enum_value(env)
     if ttype == "__directive":
         return handle_directive(env)
+    if ttype == "__schema":
+        return handle_schema(env, model_mapping, field)
     return None
 
 # https://docs.cleverbridge.com/api-documentation/graphql-api/doc/schema/schema.spec.html

@@ -1,0 +1,15 @@
+query getContacts {
+    ResPartner {
+        id
+        name
+        parent_id {
+            id
+            ...ContactData
+        }
+    }
+}
+
+fragment ContactData on ResPartner {
+  name
+  email
+}
