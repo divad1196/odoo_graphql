@@ -16,6 +16,7 @@ from graphql.language.ast import (
 from .utils import model2name, print_node as pn, resolve_data, lazy
 from .graphql_definitions.basic_types import ALL_TYPES
 from .graphql_definitions.field_args import MODELS_ARGS
+from .graphql_definitions.directives import DIRECTIVES
 from odoo import models
 
 # __Schema, __Type, __TypeKind, __Field, __InputValue, __EnumValue, __Directive
@@ -117,7 +118,6 @@ FIELDTYPE_TO_KIND = {
 }
 
 
-
 def get_field_args(relational=True):
     if not relational:
         return []
@@ -200,7 +200,7 @@ def handle_schema(env, model_mapping, field, fragments={}):
     }
     types = ALL_TYPES + [query_type] + models_types
     data = {
-        "directives": [],
+        "directives": DIRECTIVES,
         "mutationType": None,
         "queryType": {
             "name": query_type["name"],
