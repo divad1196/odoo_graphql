@@ -14,8 +14,8 @@ from graphql.language.ast import (
     FloatValueNode,
 )
 from .utils import model2name, print_node as pn, resolve_data, lazy
-from .type_kind import OBJECT
-from .basic_types import ALL_TYPES
+from .graphql_definitions.basic_types import ALL_TYPES
+from .graphql_definitions.field_args import MODELS_ARGS
 from odoo import models
 
 # __Schema, __Type, __TypeKind, __Field, __InputValue, __EnumValue, __Directive
@@ -117,63 +117,6 @@ FIELDTYPE_TO_KIND = {
 }
 
 
-DOMAIN_ARG = {
-    "name": "domain",
-    "description": None,
-    "type": {
-        "kind": "LIST",
-        "name": None,
-        "ofType": {
-            "kind": "LIST",
-            "name": None,
-            "ofType": {
-                "kind": "SCALAR",
-                "name": "_Any",
-                "ofType": None
-            }
-        }
-    },
-    "defaultValue": None
-}
-LIMIT_ARG = {
-    "name": "limit",
-    "description": None,
-    "type": {
-        "kind": "SCALAR",
-        "name": "Int",
-        "ofType": None
-    },
-    "defaultValue": None
-}
-
-OFFSET_ARG = {
-    "name": "offset",
-    "description": None,
-    "type": {
-        "kind": "SCALAR",
-        "name": "Int",
-        "ofType": None
-    },
-    "defaultValue": None
-}
-
-ORDER_ARG = {
-    "name": "order",
-    "description": None,
-    "type": {
-        "kind": "SCALAR",
-        "name": "String",
-        "ofType": None
-    },
-    "defaultValue": None
-}
-
-MODELS_ARGS = [
-    DOMAIN_ARG,
-    LIMIT_ARG,
-    OFFSET_ARG,
-    ORDER_ARG,
-]
 
 def get_field_args(relational=True):
     if not relational:
