@@ -89,7 +89,27 @@ For example, the public user (not authenticated) has by default not right over t
 
 ### Usage and examples
 
-You can find examples under the `tests` folder. Inside it you will find utilities file for javascript and python. Please, take a look at those files first.
+You can find examples under the `examples` folder. Inside it you will find utilities file for javascript and python. Please, take a look at those files first.
+
+
+
+## Introspection
+
+Introspection is not fully working for the moment but works for the integrated [GraphiQL Editor](https://github.com/graphql/graphiql).
+The editor must **NOT** be active on production database: it exposes your whole database schema, this will help attackers to gain informations about your Odoo. Also, parsing introspection is a lot heavier than normal queries.
+
+Therefore, the GraphiQL Editor AND the introspection in general are **DISABLED BY DEFAULT**.
+To activate bother the editor and introspection, you need to **create** (it does not exist by default) the `odoo_graphql.introspection` system parameter to `True` (case insensitive)
+
+![introspection_system_parameter](img/introspection_system_parameter.png)
+
+Nb: To access it: (in developer/debug mode) Settings -> Technical -> System Parameters
+        Then just click "Create"
+
+![graphiql](img/graphiql.png)
+
+GraphiQL is available at `/graphiql` (just that, nothing else)
+![graphiql_url](img/graphiql_url.png)
 
 
 

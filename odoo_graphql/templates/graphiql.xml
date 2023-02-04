@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="graphiql" name="GraphiQl">
+        <t t-call="web.layout">
+            <script src="/odoo_graphql/static/js/react.production.min.js"></script>
+            <script src="/odoo_graphql/static/js/react-dom.production.min.js"></script>
+            <link href="/odoo_graphql/static/css/graphiql.min.css" rel="stylesheet" />
+            <script src="/odoo_graphql/static/js/graphiql.min.js"></script>
+            <div style="height: calc(100vh - 100px);">
+                <div id="graphiql" style="height: 100%;"></div>
+            </div>
+            <script>
+                var graphQLFetcher = graphQLParams => {
+                    return fetch('/graphql', {
+                        method: 'post',
+                        body: JSON.stringify(graphQLParams),
+                    }).then(response => response.json());
+                };
+                ReactDOM.render(
+                    React.createElement(GraphiQL, { fetcher: graphQLFetcher }),
+                    document.getElementById('graphiql')
+                );
+            </script>
+        </t>
+    </template>
+</odoo>

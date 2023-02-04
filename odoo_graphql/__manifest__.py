@@ -2,7 +2,7 @@
 
 {
     "name": "Odoo GraphQL",
-    "version": "1.0",
+    "version": "2.0",
     "author": "Gallay David",
     "category": "Extra Tools",
     "license": "LGPL-3",
@@ -11,7 +11,9 @@
     "depends": [
         "base",
     ],
-    "data": [],
+    "data": [
+        "templates/graphiql.xml",
+    ],
     "external_dependencies": {
         "python": ["graphql-core"],
     },
