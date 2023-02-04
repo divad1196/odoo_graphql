@@ -80,7 +80,7 @@ To activate bother the editor and introspection, you need to **create** (it does
 Nb: To access it: (in developer/debug mode) Settings -> Technical -> System Parameters
         Then just click "Create"
 
-![graphiql](odoo_graphql/img/graphiql.png)
+![graphiql](odoo_graphql/static/description/graphiql.png)
 
 GraphiQL is available at `/graphiql` (just that, nothing else)
 ![graphiql_url](odoo_graphql/img/graphiql_url.png)

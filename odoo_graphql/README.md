@@ -106,7 +106,7 @@ To activate bother the editor and introspection, you need to **create** (it does
 Nb: To access it: (in developer/debug mode) Settings -> Technical -> System Parameters
         Then just click "Create"
 
-![graphiql](img/graphiql.png)
+![graphiql](static/description/graphiql.png)
 
 GraphiQL is available at `/graphiql` (just that, nothing else)
 ![graphiql_url](img/graphiql_url.png)
