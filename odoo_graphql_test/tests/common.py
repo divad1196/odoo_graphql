@@ -7,6 +7,5 @@ class TestGraphQlCommon(TestProductCommon):
 
     @classmethod
     def setUpClass(cls):
-        print("^" * 50)
         super(TestGraphQlCommon, cls).setUpClass()
 

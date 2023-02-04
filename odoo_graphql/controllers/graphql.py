@@ -16,7 +16,7 @@ class GraphQL(http.Controller):
         query = request.httprequest.data.decode()  # request.graphqlrequest
         response = request.env["graphql.handler"].handle_query(query)
         payload = json.dumps(response, indent=4)
-        print(payload)
+        # print(payload)
         return payload
 
     @http.route(

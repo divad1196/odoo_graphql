@@ -158,10 +158,10 @@ def _parse_definition(
     data = {}
     for field in definition.selection_set.selections:
         fname = field.alias and field.alias.value or field.name.value
-        # res = handle_introspection(env, model_mapping, fragments, field)
-        # if res is not None:
-        #     data[fname] = res
-        #     continue
+        res = handle_introspection(env, model_mapping, field, fragments=fragments)
+        if res is not None:
+            data[fname] = res
+            continue
         model = model_mapping.get(field.name.value)
         if model is None:
             raise ValidationError("Model {} does not exists".format(field.name.value))

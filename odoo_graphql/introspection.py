@@ -16,7 +16,7 @@ from graphql.language.ast import (
 
 # __Schema, __Type, __TypeKind, __Field, __InputValue, __EnumValue, __Directive
 
-def handle_introspection(env, model_mapping, field):
+def handle_introspection(env, model_mapping, field, fragments={}):
     ttype = field.name.value
     if not ttype.startswith("__"):
         return None
@@ -34,11 +34,11 @@ def handle_introspection(env, model_mapping, field):
     if ttype == "__directive":
         return handle_directive(env)
     if ttype == "__schema":
-        return handle_schema(env, model_mapping, field)
+        return handle_schema(env, model_mapping, field, fragments=fragments)
     return None
 
 # https://docs.cleverbridge.com/api-documentation/graphql-api/doc/schema/schema.spec.html
-def handle_schema(env, model_mapping, fragments, field):
+def handle_schema(env, model_mapping, field, fragments={}):
     print("=" * 80)
     print("handle_schema")
     print(dir(field))

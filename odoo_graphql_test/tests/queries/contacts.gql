@@ -5,6 +5,10 @@ query getContacts {
         parent_id {
             id
             ...ContactData
+            parent_id {
+                id
+                ...ContactData
+            }
         }
     }
 }

@@ -25,10 +25,12 @@ class TestName(TestGraphQlCommon):
         self.assertTrue(contains(parent, ("id", "name", "email")))
         # self.assertIn(("id", "name", "email"), parent)
   
-    # def test_introspection(self):
-    #     print("\n" * 50)
-    #     print("=" * 50)
-    #     with open_query("introspection.gql") as f:
-    #         query = f.read()
-    #     res = self.env["graphql.handler"].handle_query(query)
-    #     print(res)
+    def test_introspection(self):
+        print("\n" * 50)
+        print("=" * 50)
+        with open_query("introspection.gql") as f:
+            query = f.read()
+        res = self.env["graphql.handler"].handle_query(query)
+        print("\n" * 3)
+        print("v" * 50)
+        print(res)
