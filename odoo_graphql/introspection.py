@@ -14,8 +14,8 @@ from graphql.language.ast import (
     FloatValueNode,
 )
 from .utils import model2name, print_node as pn, resolve_data, lazy
-from .type_kind import OBJECT
-from .basic_types import ALL_TYPES
+from .graphql_definitions.basic_types import ALL_TYPES
+from .graphql_definitions.field_args import MODELS_ARGS
 from odoo import models
 
 # __Schema, __Type, __TypeKind, __Field, __InputValue, __EnumValue, __Directive
@@ -116,6 +116,13 @@ FIELDTYPE_TO_KIND = {
     'selection': "String",
 }
 
+
+
+def get_field_args(relational=True):
+    if not relational:
+        return []
+    return MODELS_ARGS
+
 def get_field_type_data(field):
     if field.relational:
         return {
@@ -129,13 +136,15 @@ def get_field_type_data(field):
         "ofType": None
     }
 
+
 def field2type(field, node=None):
     """
         Convert a model to a graphql __Type
         https://docs.cleverbridge.com/api-documentation/graphql-api/doc/schema/type.spec.html
     """
     type_data = get_field_type_data(field)
-    if field.type in ("one2many", "many2many"):
+    relational = field.type in ("one2many", "many2many")
+    if relational:
         type_data = {
             "kind": "LIST",
             "name": None,
@@ -150,7 +159,7 @@ def field2type(field, node=None):
     data = resolve_data(node, {
         "name": field.name,
         "description": field.string or field.name,
-        "args": [],
+        "args": get_field_args(relational),
         "type": type_data
     })
     return data
@@ -176,7 +185,7 @@ def handle_schema(env, model_mapping, field, fragments={}):
             {
                 "name": model_name,
                 "description": None,
-                "args": [],
+                "args": get_field_args(True),
                 "type": {
                     "kind": "OBJECT",
                     "name": model_name,

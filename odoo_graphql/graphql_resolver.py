@@ -168,13 +168,17 @@ def _parse_definition(
         model = model_mapping.get(field.name.value)
         if model is None:
             raise ValidationError("Model {} does not exists".format(field.name.value))
-        data[fname] = parse_model_field(
+        data[fname], _ = parse_model_field(
             model,
             field,
             variables,
             mutation=mutation,
             allowed_fields=allowed_fields,
             fragments=fragments,
+            # Only the first level can do limit/offset
+            # The nested data are retrieved in batch to reduce SQL queries and improve performance
+            # Therefore, we cannot apply the limit/offset on the batch queries
+            do_limit_offset=True,
         )
     return data
 
@@ -210,6 +214,19 @@ def parse_definition(env, definition, model_mapping,
         introspection=introspection,
     )
 
+def slice_result(res, limit=None, offset=None):
+    if limit is None and offset is None:
+        return res
+    offset = offset or 0
+    limit = (limit or 0) + offset
+    return res[offset:limit]
+
+def slice_result(res, limit=None, offset=None):
+    if limit is None and offset is None:
+        return res
+    offset = offset or 0
+    limit = (limit or 0) + offset
+    return res[offset:limit]
 
 def relation_subgathers(records, relational_data, variables, fragments={}):
     """
@@ -226,13 +243,14 @@ def relation_subgathers(records, relational_data, variables, fragments={}):
         for f in fields:
             # Nb: Even if its the same field, the domain may change
             alias = f.alias and f.alias.value or f.name.value
-            tmp = parse_model_field(
+            tmp, (limit, offset) = parse_model_field(
                 submodel, f, variables, ids=sub_records_ids, fragments=fragments
             )
             data = {d["id"]: (i, d) for i, d in enumerate(tmp)}
 
+
             # https://stackoverflow.com/questions/8946868/is-there-a-pythonic-way-to-close-over-a-loop-variable
-            def subgather(ids, data=data):
+            def subgather(ids, data=data, limit=limit, offset=offset):
                 if ids is False:
                     return None
                 # We may not receive all ids since records may be archived
@@ -240,13 +258,13 @@ def relation_subgathers(records, relational_data, variables, fragments={}):
                     return data.get(ids)[1]
                 # Since the data are gathered in batch, then dispatched,
                 # The order is lost and must be done again.
-                res = [
+                res = slice_result([
                     d
                     for _, d in sorted(
                         (d for d in (data.get(rec_id) for rec_id in ids) if d),
                         key=lambda t: t[0],
                     )
-                ]
+                ], limit, offset)
                 return res
 
             aliases.append((alias, subgather))
@@ -269,7 +287,7 @@ def make_domain(domain, ids):
 
 
 # TODO: make it possible to define custom create/write handlers per models
-def retrieve_records(model, field, variables, ids=None, mutation=False):
+def retrieve_records(model, field, variables, ids=None, mutation=False, do_limit_offset=False):
     """
         The main goal of this function is to perform a `search` and retrieve records
         If the query is a mutation:
@@ -278,6 +296,9 @@ def retrieve_records(model, field, variables, ids=None, mutation=False):
           Be very cautious not to provide an empty list and write every records by accident!
     """
     domain, kwargs, vals = parse_arguments(field.arguments, variables)
+    limit = kwargs.get("limit")
+    offset = kwargs.get("offset")
+    search_args = (limit, offset)
     # Create is requested
     if mutation and domain is None: 
         try:
@@ -287,22 +308,25 @@ def retrieve_records(model, field, variables, ids=None, mutation=False):
                 model.env.cr.rollback()
                 raise ValidationError(str(e).split("\n")[0])
             raise
-        return records
+        return records, search_args
 
     # Retrieve records
+    extra_search_args = {"order": kwargs.get("order")}
+    if do_limit_offset:
+        extra_search_args = kwargs
     domain = make_domain(domain or [], ids)
-    records = model.search(domain, **kwargs)
+    records = model.search(domain, **extra_search_args)
 
     # Write is requested (mutation with domain provided)
     if mutation: 
         records.write(vals)
 
-    return records
+    return records, search_args
 
 # Nb: the parameter "ids" is useful for relational fields
 def parse_model_field(
     model, field, variables, ids=None, mutation=False, allowed_fields=None,
-    fragments={}
+    fragments={}, do_limit_offset=False,
 ):
     """
         Nb: This function is (indirectly) recursive.
@@ -315,16 +339,17 @@ def parse_model_field(
         variables = {}
     if allowed_fields is None:
         allowed_fields = {}
-    records = retrieve_records(
+    records, search_args = retrieve_records(
         model,
         field,
         variables=variables,
         ids=ids,
         mutation=mutation,
+        do_limit_offset=do_limit_offset,
     )
     # Short-circuit the whole code
     if not records:
-        return []
+        return [], search_args
     model_name = model._name
 
     # User may have forgotten to define subfields
@@ -350,7 +375,7 @@ def parse_model_field(
         if not fields:
             return [
                 {"id": rid} for rid in records.ids
-            ]
+            ], search_args
     fields_names = [f.name.value for f in fields]
 
     # Get datas
@@ -377,7 +402,7 @@ def parse_model_field(
                 # Here we are retrieving the records data by their id
                 tmp[alias] = subgather(ids)
         data.append(tmp)
-    return data
+    return data, search_args
 
 
 def get_fields_data(model, fields):

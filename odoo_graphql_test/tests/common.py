@@ -8,7 +8,9 @@ class TestGraphQlCommonWithoutIntrospection(TestProductCommon):
     @classmethod
     def setUpClass(cls):
         super(TestGraphQlCommonWithoutIntrospection, cls).setUpClass()
-
+        cls.env['ir.config_parameter'].search([
+            ("key", "=", "odoo_graphql.introspection"),
+        ]).unlink()
 
 
 class TestGraphQlCommon(TestGraphQlCommonWithoutIntrospection):
