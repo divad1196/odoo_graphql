@@ -116,6 +116,70 @@ FIELDTYPE_TO_KIND = {
     'selection': "String",
 }
 
+
+DOMAIN_ARG = {
+    "name": "domain",
+    "description": None,
+    "type": {
+        "kind": "LIST",
+        "name": None,
+        "ofType": {
+            "kind": "LIST",
+            "name": None,
+            "ofType": {
+                "kind": "SCALAR",
+                "name": "_Any",
+                "ofType": None
+            }
+        }
+    },
+    "defaultValue": None
+}
+LIMIT_ARG = {
+    "name": "limit",
+    "description": None,
+    "type": {
+        "kind": "SCALAR",
+        "name": "Int",
+        "ofType": None
+    },
+    "defaultValue": None
+}
+
+OFFSET_ARG = {
+    "name": "offset",
+    "description": None,
+    "type": {
+        "kind": "SCALAR",
+        "name": "Int",
+        "ofType": None
+    },
+    "defaultValue": None
+}
+
+ORDER_ARG = {
+    "name": "order",
+    "description": None,
+    "type": {
+        "kind": "SCALAR",
+        "name": "String",
+        "ofType": None
+    },
+    "defaultValue": None
+}
+
+MODELS_ARGS = [
+    DOMAIN_ARG,
+    LIMIT_ARG,
+    OFFSET_ARG,
+    ORDER_ARG,
+]
+
+def get_field_args(relational=True):
+    if not relational:
+        return []
+    return MODELS_ARGS
+
 def get_field_type_data(field):
     if field.relational:
         return {
@@ -129,13 +193,15 @@ def get_field_type_data(field):
         "ofType": None
     }
 
+
 def field2type(field, node=None):
     """
         Convert a model to a graphql __Type
         https://docs.cleverbridge.com/api-documentation/graphql-api/doc/schema/type.spec.html
     """
     type_data = get_field_type_data(field)
-    if field.type in ("one2many", "many2many"):
+    relational = field.type in ("one2many", "many2many")
+    if relational:
         type_data = {
             "kind": "LIST",
             "name": None,
@@ -150,7 +216,7 @@ def field2type(field, node=None):
     data = resolve_data(node, {
         "name": field.name,
         "description": field.string or field.name,
-        "args": [],
+        "args": get_field_args(relational),
         "type": type_data
     })
     return data
@@ -176,7 +242,7 @@ def handle_schema(env, model_mapping, field, fragments={}):
             {
                 "name": model_name,
                 "description": None,
-                "args": [],
+                "args": get_field_args(True),
                 "type": {
                     "kind": "OBJECT",
                     "name": model_name,

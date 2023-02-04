@@ -9,6 +9,9 @@ BOOLEAN = {
     "possibleTypes": None
 }
 
+# TODO: Date, Datetime, Decimal and Int
+# https://docs.cleverbridge.com/api-documentation/graphql-api/doc/schema/date.doc.html
+
 STRING = {
     "kind": "SCALAR",
     "name": "String",
@@ -24,6 +27,17 @@ ID = {
     "kind": "SCALAR",
     "name": "ID",
     "description": "The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `\"4\"`) or integer (such as `4`) input value will be accepted as an ID.",
+    "fields": None,
+    "inputFields": None,
+    "interfaces": None,
+    "enumValues": None,
+    "possibleTypes": None
+}
+
+INT = {
+    "kind": "SCALAR",
+    "name": "Int",
+    "description": "The `Int` scalar represent an integer.",
     "fields": None,
     "inputFields": None,
     "interfaces": None,
@@ -990,6 +1004,7 @@ ALL_TYPES_MAPPING = {
     "BOOLEAN": BOOLEAN,
     "STRING": STRING,
     "ID": ID,
+    "INT": INT,
     "ANY": ANY,
     "SERVICE": SERVICE,
     "SCHEMA": SCHEMA,
