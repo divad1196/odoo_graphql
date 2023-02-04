@@ -67,6 +67,26 @@ Be aware that this module **DOES NOT HANDLE CORS**, that means that without any 
 
 
 
+## Introspection
+
+Introspection is not fully working for the moment but works for the integrated [GraphiQL Editor](https://github.com/graphql/graphiql).
+The editor must **NOT** be active on production database: it exposes your whole database schema, this will help attackers to gain informations about your Odoo. Also, parsing introspection is a lot heavier than normal queries.
+
+Therefore, the GraphiQL Editor AND the introspection in general are **DISABLED BY DEFAULT**.
+To activate bother the editor and introspection, you need to **create** (it does not exist by default) the `odoo_graphql.introspection` system parameter to `True` (case insensitive)
+
+![introspection_system_parameter](odoo_graphql/img/introspection_system_parameter.png)
+
+Nb: To access it: (in developer/debug mode) Settings -> Technical -> System Parameters
+        Then just click "Create"
+
+![graphiql](odoo_graphql/img/graphiql.png)
+
+GraphiQL is available at `/graphiql` (just that, nothing else)
+![graphiql_url](odoo_graphql/img/graphiql_url.png)
+
+
+
 ## External Website
 
 You may want to create a custom website for your Odoo using modern technolgies as VueJS, ReactJS, ...

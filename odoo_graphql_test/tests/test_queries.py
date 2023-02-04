@@ -11,7 +11,7 @@ class TestName(TestGraphQlCommon):
     #     super().setUp()
   
     def test_contact(self):
-        print("\n" * 20)
+        print("\n" * 10)
         print("=" * 50)
         with open_query("contacts.gql") as f:
             query = f.read()
@@ -32,7 +32,7 @@ class TestName(TestGraphQlCommon):
         res = self.env["graphql.handler"].handle_query(query)
   
     def test_introspection(self):
-        print("\n" * 20)
+        print("\n" * 10)
         print("=" * 50)
         with open_query("introspection.gql") as f:
             query = f.read()
