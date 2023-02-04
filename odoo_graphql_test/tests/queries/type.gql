@@ -1,0 +1,12 @@
+query test {
+	__type(name: "ResPartner") {
+    name
+    fields {
+      name
+      description
+      args {
+        name
+      }
+    }
+  }
+}

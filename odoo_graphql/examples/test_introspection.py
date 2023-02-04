@@ -19,5 +19,15 @@ def pn(node):
 with open("graphiql_query.gql") as f:
     doc = parse(f.read())
 
-n = doc.definitions[0]  # normal node
-fs = fragment_spread = n.selection_set.selections[0].selection_set.selections[3].selection_set.selections[0]
+op, fragments = doc.definitions[0], doc.definitions[1:]
+fs = fragment_spread = op.selection_set.selections[0].selection_set.selections[3].selection_set.selections[0]
+
+schema = op.selection_set.selections[0]
+
+
+t_insp = type_introspection = parse("""query {
+  __type(name: "ResPartner") {
+    name
+  }
+}""").definitions[0]
+t_field = t_insp.selection_set.selections[0]

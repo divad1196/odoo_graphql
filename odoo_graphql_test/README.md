@@ -1,6 +1,7 @@
 # Tests directives
 
-[odoo documentation](https://www.odoo.com/documentation/16.0/fr/developer/reference/backend/testing.html)
+[odoo documentation](https://www.odoo.com/documentation/16.0/fr/developer/reference/backend/testing.html).
+Required: Odoo Community Edition
 
 We use a [separate module](https://github.com/odoo/odoo/issues/40188) for the tests in order to import other modules.
 The odoo_graphql doesn't had any data that can be used for efficient tests
@@ -72,3 +73,19 @@ self.assertTrue(value)
   ```
 
   
+
+## Bugs found
+
+First, firefox truncate the response result. You can [change your settings](https://stackoverflow.com/questions/51687462/firefox-developer-tools-truncates-long-network-response-chrome-does-not-show) to prevent that.
+Once you are done testing, I recommend setting back a limit. A decent default is `1048576`.
+
+
+
+Odoo responses may be truncated. The `ODOO_HTTP_SOCKET_TIMEOUT` environment variable may help
+
+```bash
+export ODOO_HTTP_SOCKET_TIMEOUT=120
+```
+
+Nb: Setting this value to an higher value than the default increase a risk of DoS attack.
+

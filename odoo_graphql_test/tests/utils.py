@@ -1,4 +1,8 @@
 from pathlib import Path
+import json
+
+def pretty_print(data, indent=4):
+    print(json.dumps(data, indent=indent))
 
 def _current_file_path():
     return Path(__file__).absolute().parent / "queries"

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, tools
-from ..utils import handle_graphql, model2name
+from ..graphql_resolver import handle_graphql
+from ..utils import model2name
 import json
 
 import logging
@@ -11,6 +12,12 @@ _logger = logging.getLogger(__name__)
 
 class GraphQLHandler(models.TransientModel):
     _name = "graphql.handler"
+
+    def has_introspection(self):
+        introspection = self.env['ir.config_parameter'].sudo().get_param(
+            'odoo_graphql.introspection', ""
+        ).strip().lower() == "true"
+        return introspection
 
     def handle_query(self, query):
         if isinstance(query, bytes):
@@ -41,7 +48,6 @@ class GraphQLHandler(models.TransientModel):
                 }
         except Exception:  # We may have pure graphql query
             pass
-
         response = self.handle_graphql(
             query,
             variables=variables,
@@ -58,6 +64,7 @@ class GraphQLHandler(models.TransientModel):
         operation=None,
         allowed_fields={},
     ):
+        introspection = self.has_introspection()
         # This is the function from ..utils.py file
         return handle_graphql(
             self.env,
@@ -66,6 +73,7 @@ class GraphQLHandler(models.TransientModel):
             variables=variables,
             operation=operation,
             allowed_fields=allowed_fields,
+            introspection=introspection
         )
 
     def handle_graphql(

@@ -1,5 +1,7 @@
 from odoo import http
 from odoo.http import request, content_disposition
+from odoo.exceptions import ValidationError
+import werkzeug
 import json
 
 import logging
@@ -43,4 +45,8 @@ class GraphQL(http.Controller):
         "/graphiql", type="http", website=True, sitemap=False
     )
     def graphiql(self):
+        introspection = request.env["graphql.handler"].has_introspection()
+        if not introspection:
+            raise werkzeug.exceptions.NotFound()
+            # raise ValidationError("Introspection is not allowed")
         return request.render("odoo_graphql.graphiql")
