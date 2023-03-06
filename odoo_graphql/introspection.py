@@ -15,7 +15,7 @@ from graphql.language.ast import (
 )
 from .utils import model2name, print_node as pn, resolve_data, lazy
 from .graphql_definitions.basic_types import ALL_TYPES
-from .graphql_definitions.field_args import MODELS_ARGS
+from .graphql_definitions.field_args import MODELS_ARGS, DATE_FORMAT, DATETIME_TZ
 from .graphql_definitions.directives import DIRECTIVES
 from odoo import models
 
@@ -118,9 +118,18 @@ FIELDTYPE_TO_KIND = {
 }
 
 
-def get_field_args(relational=True):
+def get_field_args(relational=True, field=None):
     if not relational:
-        return []
+        if not field:
+            return []
+        if field.type == "date":
+            return [
+                DATE_FORMAT,
+            ]
+        if field.type == "datetime":
+            return [
+                DATE_FORMAT, DATETIME_TZ
+            ]
     return MODELS_ARGS
 
 def get_field_type_data(field):
@@ -159,7 +168,7 @@ def field2type(field, node=None):
     data = resolve_data(node, {
         "name": field.name,
         "description": field.string or field.name,
-        "args": get_field_args(relational),
+        "args": get_field_args(relational, field),
         "type": type_data
     })
     return data

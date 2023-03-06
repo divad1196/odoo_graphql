@@ -62,6 +62,7 @@ class GraphQLHandler(models.TransientModel):
         model_mapping,
         variables={},
         operation=None,
+        field_mapping={},
         allowed_fields={},
     ):
         introspection = self.has_introspection()
@@ -72,6 +73,7 @@ class GraphQLHandler(models.TransientModel):
             model_mapping,
             variables=variables,
             operation=operation,
+            field_mapping=field_mapping,
             allowed_fields=allowed_fields,
             introspection=introspection
         )
@@ -83,6 +85,7 @@ class GraphQLHandler(models.TransientModel):
         operation=None,
     ):
         model_mapping = self.get_model_mapping()
+        field_mapping = self.get_fields_mapping()
         allowed_fields = self.get_allowed_fields()
         extra_variables = self.get_extra_variables()
         variables = {**extra_variables, **variables}
@@ -92,6 +95,7 @@ class GraphQLHandler(models.TransientModel):
             model_mapping,
             variables=variables,
             operation=operation,
+            field_mapping=field_mapping,
             allowed_fields=allowed_fields,
         )
         return response
@@ -153,62 +157,55 @@ class GraphQLHandler(models.TransientModel):
         # Empty list allows no field.
         # e.g.: {"helpdesk.ticket": []}
         return {}
+    
+    @tools.ormcache()
+    def get_fields_mapping(self):
+        """
+            return a mapping per model of their fields'type.
+            {
+                "sale.order": {
+                    "create_date": "date"
+                }
+            }
+            The goal is to be able to call the correct serializer
+        """
+        self = self.sudo()
+        fields = self.env["ir.model.fields"].search([
+            ("model_id.transient", "=", False),
+            ("ttype", "in", (
+                "date", "datetime",
+            ))
+        ])
+        data = {}
+        for f in fields:
+            model = data.setdefault(f.model_id.model, {})
+            model[f.name] = f.ttype
+        return data
+
+    @tools.ormcache()
+    def get_fields_mapping_by_type(self):
+        """
+            return a mapping per model of their fields group by type.
+            {
+                "sale.order": {
+                    "date": ["create_date"]
+                }
+            }
+            The goal is to be able to call the correct serializer
+        """
+        self = self.sudo()
+        fields = self.env["ir.model.fields"].search([
+            ("model_id.transient", "=", False),
+            ("ttype", "in", (
+                "date", "datetime",
+            ))
+        ])
+        data = {}
+        for f in fields:
+            model = data.setdefault(f.model_id.model, {})
+            field_type = model.setdefault(f.ttype, [])
+            field_type.append(f.name)
+        return {}
 
     def get_extra_variables(self):
         return self.env.context
-
-    def _schema_field(self, ir_field, reverse_mapping):
-        ttype = ir_field.ttype
-        if ir_field.name == "id":
-            ttype = "ID"
-        elif ttype == "many2one":
-            ttype = reverse_mapping.get(ir_field.relation, "Int")
-        elif ttype in ("many2many", "one2many"):
-            ttype = "[{ttype}]".format(
-                ttype=reverse_mapping.get(ir_field.relation, "Int")
-            )
-        elif ttype in ("integer",):
-            ttype = "Int"
-        elif ttype in ("float", "monetary"):
-            ttype = "Float"
-        elif ttype in ("boolean",):
-            ttype = "Boolean"
-        elif ttype in ("selection",):
-            ttype = "[String]"
-        else:
-            ttype = "String"
-
-        if ir_field.required:
-            ttype += "!"
-
-        res = "{name}: {ttype}".format(
-            name=ir_field.name,
-            ttype=ttype,
-        )
-        return res
-
-    def _schema(self, ir_model, reverse_mapping, allowed_fields):
-        name = reverse_mapping.get(ir_model.model)
-        res = "type {name} {{\n".format(name=name)
-
-        fields = ir_model.field_id
-        allowed_fields = allowed_fields.get(ir_model.model)
-        if allowed_fields is not None:
-            fields.filtered(lambda f: f in allowed_fields)
-
-        for f in fields:
-            res += "    " + self._schema_field(f, reverse_mapping) + "\n"
-
-        res += "}\n"
-        return res
-
-    def schema(self):
-        ir_model_ids = self.get_allowed_models()
-        mapping = self.get_model_mapping()
-        reverse_mapping = {m._name: name for name, m in mapping.items()}
-        allowed_fields = self.get_allowed_fields()
-
-        res = "\n".join(
-            self._schema(m, reverse_mapping, allowed_fields) for m in ir_model_ids
-        )
-        return res

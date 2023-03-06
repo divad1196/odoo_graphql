@@ -16,7 +16,8 @@ from graphql.language.ast import (
 )
 # from .utils import model2name, print_node as pn
 from .introspection import handle_introspection
-
+import pytz
+from .graphql_definitions.utils import timezones
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ def get_definition(doc, operation=None):
 
 def handle_graphql(
         env, doc, model_mapping,
-        variables={}, operation=None, allowed_fields={},
+        variables={}, operation=None, field_mapping={}, allowed_fields={},
         introspection=False,
     ):
     response = {}
@@ -74,12 +75,12 @@ def handle_graphql(
             model_mapping,
             variables=variables,
             operation=operation,
+            field_mapping=field_mapping,
             allowed_fields=allowed_fields,
             introspection=introspection,
         )
         response["data"] = data
     except Exception as e:
-        raise e  # TODO: Remove the raise error on production
         _logger.critical(e)
         response["data"] = None
         response["errors"] = {"message": str(e)}  # + traceback.format_exc()
@@ -88,7 +89,7 @@ def handle_graphql(
 
 def parse_document(
         env, doc, model_mapping,
-        variables={}, operation=None, allowed_fields={},
+        variables={}, operation=None, field_mapping={}, allowed_fields={},
         introspection=False,
     ):
     if isinstance(doc, str):
@@ -99,6 +100,7 @@ def parse_document(
     return parse_definition(
         env, definition, model_mapping,
         variables=variables,
+        field_mapping=field_mapping,
         allowed_fields=allowed_fields,
         fragments=fragments,
         introspection=introspection,
@@ -151,7 +153,7 @@ def parse_directives(directives, variables={}):
 
 def _parse_definition(
     env,
-    definition, model_mapping, variables, mutation, allowed_fields, fragments,
+    definition, model_mapping, variables, mutation, field_mapping, allowed_fields, fragments,
     introspection=False
 ):
     """
@@ -173,6 +175,7 @@ def _parse_definition(
             field,
             variables,
             mutation=mutation,
+            field_mapping=field_mapping,
             allowed_fields=allowed_fields,
             fragments=fragments,
             # Only the first level can do limit/offset
@@ -185,6 +188,7 @@ def _parse_definition(
 
 def parse_definition(env, definition, model_mapping,
         variables=None,
+        field_mapping={},
         allowed_fields=None,
         fragments={}, 
         introspection=False,
@@ -209,6 +213,7 @@ def parse_definition(env, definition, model_mapping,
         model_mapping,
         variables,
         mutation,
+        field_mapping,
         allowed_fields,
         fragments,
         introspection=introspection,
@@ -228,7 +233,7 @@ def slice_result(res, limit=None, offset=None):
     limit = (limit or 0) + offset
     return res[offset:limit]
 
-def relation_subgathers(records, relational_data, variables, fragments={}):
+def relation_subgathers(records, relational_data, variables, field_mapping={}, fragments={}):
     """
         Retrieve nested data for relational fields
 
@@ -244,7 +249,7 @@ def relation_subgathers(records, relational_data, variables, fragments={}):
             # Nb: Even if its the same field, the domain may change
             alias = f.alias and f.alias.value or f.name.value
             tmp, (limit, offset) = parse_model_field(
-                submodel, f, variables, ids=sub_records_ids, fragments=fragments
+                submodel, f, variables, ids=sub_records_ids, field_mapping=field_mapping, fragments=fragments
             )
             data = {d["id"]: (i, d) for i, d in enumerate(tmp)}
 
@@ -323,9 +328,64 @@ def retrieve_records(model, field, variables, ids=None, mutation=False, do_limit
 
     return records, search_args
 
+
+def args2dict(args, variables=None):
+    data = {}
+    for a in args:
+        name = a.name.value
+        value = value2py(a.value, variables=variables)
+        data[name] = value
+    return data
+
+
+def _get_type_serializer_date(field, variables=None):
+    data = args2dict(field.arguments)
+    fmt = data.get("format")
+    def func(value):
+        if fmt:
+            return value.strftime(fmt)
+        return value.toordinal()
+    return func
+def _get_type_serializer_datetime(field, variables=None):
+    data = args2dict(field.arguments)
+    tz = data.get("tz")
+    if tz:
+        tz = timezones.get(tz, tz)
+        tz = pytz.timezone(tz)
+    fmt = data.get("format")
+    def func(value):
+        if tz:
+            value = value.replace(tzinfo=pytz.utc).astimezone(tz)
+        if fmt:
+            return value.strftime(fmt)
+        return value.timestamp()
+    return func
+
+def _get_type_serializer(field, ttype, variables=None):
+    if ttype == "date":
+        return _get_type_serializer_date(field, variables=variables)
+    if ttype == "datetime":
+        return _get_type_serializer_datetime(field, variables=variables)
+    return lambda value: str(value)
+
+def get_type_serializer(model_name, fields, field_mapping={}):
+    model_fields = field_mapping.get(model_name)
+    if not model_fields:
+        return []
+    serializers = []
+    for f in fields:
+        ttype = model_fields.get(f.name.value)
+        if not ttype:
+            continue
+        name = f.alias and f.alias.value or f.name.value
+        func = _get_type_serializer(f, ttype)
+        serializers.append((name, func))
+    return serializers
+
+
 # Nb: the parameter "ids" is useful for relational fields
 def parse_model_field(
-    model, field, variables, ids=None, mutation=False, allowed_fields=None,
+    model, field, variables, ids=None, mutation=False, field_mapping={}, allowed_fields=None,
     fragments={}, do_limit_offset=False,
 ):
     """
@@ -380,7 +440,7 @@ def parse_model_field(
 
     # Get datas
     relational_data, fields_data = get_fields_data(model, fields)
-    subgathers = relation_subgathers(records, relational_data, variables, fragments=fragments)
+    subgathers = relation_subgathers(records, relational_data, variables, field_mapping=field_mapping, fragments=fragments)
     records = records.read(fields_names, load=False)
 
     data = []
@@ -402,6 +462,11 @@ def parse_model_field(
                 # Here we are retrieving the records data by their id
                 tmp[alias] = subgather(ids)
         data.append(tmp)
+
+    serializers = get_type_serializer(model_name, fields, field_mapping)
+    for name, ser in serializers:
+        for d in data:
+            d[name] = ser(d[name])
     return data, search_args
 
 

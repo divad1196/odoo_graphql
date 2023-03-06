@@ -1,3 +1,5 @@
+from .utils import timezones
+
 BOOLEAN = {
     "kind": "SCALAR",
     "name": "Boolean",
@@ -986,6 +988,28 @@ DIRECTIVE_LOCATION = {
 }
 
 
+
+DATETIME_TZ_ENUM = {
+    "kind": "ENUM",
+    "name": "Timezone",
+    "description": "",
+    "fields": None,
+    "inputFields": None,
+    "interfaces": None,
+    "enumValues": [
+        {
+            "name": tz,
+            "description": description,
+            "isDeprecated": False,
+            "deprecationReason": None
+        }
+        for tz, description in timezones.items()
+    ],
+    "possibleTypes": None
+}
+
+
+
 # QUERY = {
 #     "kind": "OBJECT",
 #     "name": "Query",
@@ -1015,6 +1039,7 @@ ALL_TYPES_MAPPING = {
     "ENUM_VALUE": ENUM_VALUE,
     "DIRECTIVE": DIRECTIVE,
     "DIRECTIVE_LOCATION": DIRECTIVE_LOCATION,
+    "DATETIME_TZ_ENUM": DATETIME_TZ_ENUM,
     # "QUERY": QUERY,
 }
 ALL_TYPES = list(ALL_TYPES_MAPPING.values())

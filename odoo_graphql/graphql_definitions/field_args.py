@@ -1,3 +1,4 @@
+from .utils import timezones
 
 DOMAIN_ARG = {
     "name": "domain",
@@ -49,6 +50,43 @@ ORDER_ARG = {
     },
     "defaultValue": None
 }
+
+
+DATE_FORMAT = {
+    "name": "format",
+    "description": None,
+    "type": {
+        "kind": "SCALAR",
+        "name": "String",
+        "ofType": None
+    },
+    "defaultValue": None
+}
+
+
+DATETIME_TZ = {
+    "name": "tz",
+    "description": None,
+    "type": {
+        "kind": "SCALAR",
+        "name": "String",
+        "ofType": None
+    },
+    "defaultValue": None
+}
+
+
+DATETIME_TZ = {
+    "name": "tz",
+    "description": None,
+    "type": {
+        "kind": "ENUM",
+        "name": "Timezone",
+        "ofType": None
+    },
+    "defaultValue": None
+}
+
 
 MODELS_ARGS = [
     DOMAIN_ARG,
