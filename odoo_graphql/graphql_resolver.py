@@ -256,7 +256,7 @@ def relation_subgathers(records, relational_data, variables, field_mapping={}, f
 
             # https://stackoverflow.com/questions/8946868/is-there-a-pythonic-way-to-close-over-a-loop-variable
             def subgather(ids, data=data, limit=limit, offset=offset):
-                if ids is False:
+                if ids is False or not data:
                     return None
                 # We may not receive all ids since records may be archived
                 if isinstance(ids, int):
