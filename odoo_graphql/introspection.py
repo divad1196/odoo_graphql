@@ -130,6 +130,7 @@ def get_field_args(relational=True, field=None):
             return [
                 DATE_FORMAT, DATETIME_TZ
             ]
+        return []
     return MODELS_ARGS
 
 def get_field_type_data(field):
