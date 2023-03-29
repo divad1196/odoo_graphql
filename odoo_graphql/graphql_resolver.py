@@ -233,6 +233,30 @@ def slice_result(res, limit=None, offset=None):
     limit = (limit or 0) + offset
     return res[offset:limit]
 
+def default_empty_subgather(ids):
+    if ids is False or isinstance(ids, int):
+        return None
+    return []
+
+def inner_subgather(ids, data, limit, offset):
+    if ids is False:
+        return None
+    # We may not receive all ids since records may be archived
+    if isinstance(ids, int):
+        return data.get(ids, (None, None))[1]
+    if len(ids) == 1:
+        return [data.get(ids[0], (None, None))[1]]
+    # Since the data are gathered in batch, then dispatched,
+    # The order is lost and must be done again.
+    res = slice_result([
+        d
+        for _, d in sorted(
+            (d for d in (data.get(rec_id) for rec_id in ids) if d),
+            key=lambda t: t[0],
+        )
+    ], limit, offset)
+    return res
+
 def relation_subgathers(records, relational_data, variables, field_mapping={}, fragments={}):
     """
         Retrieve nested data for relational fields
@@ -251,26 +275,15 @@ def relation_subgathers(records, relational_data, variables, field_mapping={}, f
             tmp, (limit, offset) = parse_model_field(
                 submodel, f, variables, ids=sub_records_ids, field_mapping=field_mapping, fragments=fragments
             )
+            if not tmp:
+                aliases.append((alias, default_empty_subgather))
+                continue
+            
             data = {d["id"]: (i, d) for i, d in enumerate(tmp)}
-
 
             # https://stackoverflow.com/questions/8946868/is-there-a-pythonic-way-to-close-over-a-loop-variable
             def subgather(ids, data=data, limit=limit, offset=offset):
-                if ids is False:
-                    return None
-                # We may not receive all ids since records may be archived
-                if isinstance(ids, int):
-                    return data.get(ids)[1]
-                # Since the data are gathered in batch, then dispatched,
-                # The order is lost and must be done again.
-                res = slice_result([
-                    d
-                    for _, d in sorted(
-                        (d for d in (data.get(rec_id) for rec_id in ids) if d),
-                        key=lambda t: t[0],
-                    )
-                ], limit, offset)
-                return res
+                return inner_subgather(ids, data=data, limit=limit, offset=offset)
 
             aliases.append((alias, subgather))
 
