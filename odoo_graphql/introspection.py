@@ -186,7 +186,8 @@ def handle_schema(env, model_mapping, field, fragments={}):
         model2type(model)
         for model in models
     ]
-
+    models_types = [t for t in models_types if t["fields"]]
+    # TODO: Remove fields that reference types that where removed?
     query_type = {
         "kind": "OBJECT",
         "name": "Query",
@@ -201,7 +202,7 @@ def handle_schema(env, model_mapping, field, fragments={}):
                     "name": model_name,
                     "ofType": None,
                 },
-            } for model_name in (model2name(m._name) for m in models)
+            } for model_name in (m["name"] for m in models_types)
         ],
         "inputFields": None,
         "interfaces": [],
