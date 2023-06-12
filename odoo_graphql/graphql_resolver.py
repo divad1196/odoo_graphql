@@ -18,6 +18,7 @@ from graphql.language.ast import (
 from .introspection import handle_introspection
 import pytz
 from .graphql_definitions.utils import timezones
+import traceback
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -66,6 +67,7 @@ def handle_graphql(
         env, doc, model_mapping,
         variables={}, operation=None, field_mapping={}, allowed_fields={},
         introspection=False,
+        debug=False,
     ):
     response = {}
     try:
@@ -83,7 +85,10 @@ def handle_graphql(
     except Exception as e:
         _logger.critical(e)
         response["data"] = None
-        response["errors"] = {"message": str(e)}  # + traceback.format_exc()
+        message = str(e)
+        if debug:
+            message += traceback.format_exc()
+        response["errors"] = {"message": message}
     return response
 
 
@@ -245,7 +250,8 @@ def inner_subgather(ids, data, limit, offset):
     if isinstance(ids, int):
         return data.get(ids, (None, None))[1]
     if len(ids) == 1:
-        return [data.get(ids[0], (None, None))[1]]
+        res = data.get(ids[0])
+        return [res[1]] if res is not None else []
     # Since the data are gathered in batch, then dispatched,
     # The order is lost and must be done again.
     res = slice_result([
