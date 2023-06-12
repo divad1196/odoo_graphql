@@ -9,7 +9,7 @@ The odoo_graphql doesn't had any data that can be used for efficient tests
 
 
 ```bash
-python3.8 git/Odoo/odoo/odoo-bin -c configs/graphql.conf -d graphql --test-enable --test-tags /odoo_graphql_test -i odoo_graphql_test --stop-after-init
+python3 git/Odoo/odoo/odoo-bin -c configs/graphql.conf -d graphql_v16 --test-enable --test-tags /odoo_graphql_test -i odoo_graphql_test --stop-after-init
 ```
 
 * Create database `graphql` if not exists
@@ -23,7 +23,7 @@ We can also run test on update and for specific modules
 > \[-]\[tag]\[/module]\[:class]\[.method]
 
 ```bash
-python3.8 git/Odoo/odoo/odoo-bin -c configs/graphql.conf -d graphql --test-enable --test-tags /odoo_graphql_test -u odoo_graphql_test --stop-after-init
+python3 git/Odoo/odoo/odoo-bin -c configs/graphql.conf -d graphql_v16 --test-enable --test-tags /odoo_graphql_test -u odoo_graphql_test --stop-after-init
 ```
 
 
