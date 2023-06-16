@@ -1,0 +1,9 @@
+query getContacts {
+    ResPartner {
+        id
+        name
+        category_id(domain: $domain) {
+            name
+        }
+    }
+}
