@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, tools
+from odoo.http import request
+from odoo.service.common import exp_login
 from ..graphql_resolver import handle_graphql
 from ..utils import model2name
 import json
+import base64
+
 
 import logging
 
@@ -32,14 +36,17 @@ class GraphQLHandler(models.TransientModel):
             # An error when authenticating must be sent back
             try:
                 auth = data.get("auth", {})
+                if not auth:
+                    auth = request.httprequest.authorization
                 if auth:
                     login = auth.get("login")
+                    if not login:
+                        login = auth.get("username")
                     password = auth.get("password")
                     if login and password:
-                        uid = self.env["res.users"].authenticate(
+                        uid = exp_login(
                             self.env.cr.dbname,
                             login, password,
-                            self.env
                         )
                         self = self.with_user(uid)
             except Exception as e:
