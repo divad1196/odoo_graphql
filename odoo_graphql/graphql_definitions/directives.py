@@ -42,7 +42,30 @@ SKIP = {
     ]
 }
 
+CONTEXT = {
+    "name": "context",
+    "description": "Add values to the active context to influence the query's behaviour",
+    "locations": ["QUERY", "FIELD", "FRAGMENT_SPREAD", "INLINE_FRAGMENT"],
+    "args": [
+    {
+        "name": "lang",
+        "description": "lang of the exported translations",
+        "type": {
+        "kind": "NON_NULL",
+        "name": None,
+        "ofType": {
+            "kind": "SCALAR",
+            "name": "String",
+            "ofType": None
+        }
+        },
+        "defaultValue": None
+    }
+    ]
+}
+
 DIRECTIVES = [
     INCLUDE,
-    SKIP
+    SKIP,
+    CONTEXT,
 ]
