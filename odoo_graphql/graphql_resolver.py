@@ -176,9 +176,10 @@ def _parse_definition(
         if model is None:
             raise ValidationError("Model {} does not exists".format(field.name.value))
         
+        # model = model.with_context(edit_translations=True)
         ctx = parse_context_directives(definition)
         if ctx:
-            model = model.with_context(ctx)
+            model = model.with_context(**ctx)
         data[fname], _ = parse_model_field(
             model,
             field,
@@ -336,9 +337,6 @@ def retrieve_records(model, field, variables, ids=None, mutation=False, do_limit
         - if `domain` directive is defined (even an empty list!), then it will perform a write
           Be very cautious not to provide an empty list and write every records by accident!
     """
-    ctx = parse_context_directives(field)
-    if ctx:
-        model = model.with_context(ctx)
 
     domain, kwargs, vals = parse_arguments(field.arguments, variables)
     limit = kwargs.get("limit")
@@ -435,6 +433,9 @@ def parse_model_field(
         This function will in order:
         1. Retrieve the requested records (only the id in )
     """
+    ctx = parse_context_directives(field)
+    if ctx:
+        model = model.with_context(**ctx)
     if variables is None:
         variables = {}
     if allowed_fields is None:
