@@ -175,6 +175,10 @@ def _parse_definition(
         model = model_mapping.get(field.name.value)
         if model is None:
             raise ValidationError("Model {} does not exists".format(field.name.value))
+        
+        ctx = parse_context_directives(definition)
+        if ctx:
+            model = model.with_context(ctx)
         data[fname], _ = parse_model_field(
             model,
             field,
@@ -309,6 +313,19 @@ def make_domain(domain, ids):
             domain = AND([[("id", "=", ids)], domain])
     return domain
 
+CONTEXT_VALUES = {"lang", }
+def parse_context_directives(field):
+    ctx = {}
+    for d in field.directives:
+        if d.name.value != "context":
+            continue
+        for arg in d.arguments:
+            name = arg.name.value
+            if name not in CONTEXT_VALUES:
+                continue
+            value = arg.value.value
+            ctx[name] = value
+    return ctx
 
 # TODO: make it possible to define custom create/write handlers per models
 def retrieve_records(model, field, variables, ids=None, mutation=False, do_limit_offset=False):
@@ -319,6 +336,10 @@ def retrieve_records(model, field, variables, ids=None, mutation=False, do_limit
         - if `domain` directive is defined (even an empty list!), then it will perform a write
           Be very cautious not to provide an empty list and write every records by accident!
     """
+    ctx = parse_context_directives(field)
+    if ctx:
+        model = model.with_context(ctx)
+
     domain, kwargs, vals = parse_arguments(field.arguments, variables)
     limit = kwargs.get("limit")
     offset = kwargs.get("offset")
