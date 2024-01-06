@@ -12,12 +12,41 @@
         <img alt="Icon" class="oe_picture" src="icon.png"/>
       </div>
       <div class="col-9 pt-5">
-        <p>Graphql provides a simplier and more efficient way to query data than you would currently do in Odoo (using for example xmlrpc or jsonrpc).</p>
+        <p>Graphql provides a simpler and more efficient way to query data than you would currently do in Odoo (using for example xmlrpc or jsonrpc).</p>
         <p>
           This module adds a generic way to do graphql queries and mutations on Odoo server.<br>
           This module takes into account any installed modules and use the Odoo permissions (Access rights and access rules).
         </p>
       </div>
+    </div>
+    <div>
+      <ul>
+        <li>
+          Use Odoo as your centralized database for your automations.<br>
+          Odoo has the easiest backend framework to develop with, and an active and growing community<br>
+        </li>
+        <li>
+          If you want to create your own website on top of Odoo using the most modern framework as AngularJS, VueJS or ReactJs,<br>
+          This module will provide you the simplest and most efficient way to do your queries.<br>
+          <br>
+          <span class="text-danger">DISCLAIMER:</span> To do your own website using Odoo, you will need to handle cors.<br>
+          More information are provided on the readme when you download this module, but you can already have the main information here:
+          <a href="https://github.com/divad1196/odoo_nginx_proxy">https://github.com/divad1196/odoo_nginx_proxy</a>
+        </li>
+      </ul>
+    </div>
+    <div>
+      <h2>Author's notes</h2>
+      <p>
+        If you have any issue, encounter a bug or have a feature proposal, please contact me on Github by creating an issue.<br/>
+        You don't have to be a technical person for it.<br/>
+        The project being stable, you won't see a lot of changes in the repository but if an issue
+      </p>
+      <p class="bg-warning rounded">
+        Despite the license of this project, it seems that some people stole most of its code and started to sell it.<br/>
+        (The worst is certainly that they claim to support open source.)<br/>
+        Please, contribute to open source by sparing your money.
+      </p>
     </div>
     <div>
       <h2>Use cases</h2>
@@ -28,10 +57,10 @@
         </li>
         <li>
           If you want to create your own website on top of Odoo using the most modern framework as AngularJS, VueJS or ReactJs,<br>
-          This module will provide you the simpliest and most efficient way to do your queries.<br>
+          This module will provide you the simplest and most efficient way to do your queries.<br>
           <br>
           <span class="text-danger">DISCLAIMER:</span> To do your own website using Odoo, you will need to handle cors.<br>
-          More informations are provided on the readme when you download this module, but you can already have the main informations here:
+          More information are provided on the readme when you download this module, but you can already have the main information here:
           <a href="https://github.com/divad1196/odoo_nginx_proxy">https://github.com/divad1196/odoo_nginx_proxy</a>
         </li>
       </ul>
@@ -46,11 +75,11 @@
           <strong>Genericity</strong>: You don't want to update your GraphQL models for each module you install.
         </li>
         <li>
-          <strong>Maintainance</strong>: You don't want to duplicate your code, as Odoo Model AND GraphQL model.
+          <strong>Maintenance</strong>: You don't want to duplicate your code, as Odoo Model AND GraphQL model.
           You also don't want to update your GraphQL models for each module you install.
         </li>
         <li>
-          <strong>Performance</strong>: By coding it yourself, you <span>MAY</span> have better performances, but you will <span>PROBABLY</span> have lower ones. The query processing is made as best as it can be by wrapping Odoo's ORM.
+          <strong>Performance</strong>: By coding it yourself, you <span>MAY</span> have better performances, but you will <span>PROBABLY</span> have lower ones. The query processing is made in the best way possible be by wrapping Odoo's ORM.
         </li>
         <li>
           <strong>Spare Time (and thus money)</strong>: You want to focus on the use of the data, not how you gather them.
@@ -61,13 +90,13 @@
       <h2>Security and Performance</h2>
       <p>
         The security policy is the one already defined by Odoo.
-        You cannot get more informations using GraphQL than you would using jsonrpc/xmlrpc.
-        (This module will be extendend with a per-fields access policy in a near future, but as long as RPC is allowed, this won't be any game-changer in term of security)
+        You cannot get more information using GraphQL than you would by using jsonrpc/xmlrpc.
+        (This module will be extended with a per-fields access policy in a near future, but as long as RPC is allowed, this won't be any game-changer in terms of security)
         Those security policies must not be by-passed, which may be done by a developer for any (bad) reason.
       </p>
       <p>
-        The security policies in Odoo add an overhead on each requests.
-        This module optimise the search, especially for multi-level queries.
+        The security policies in Odoo add an overhead on each request.
+        This module optimize the search, especially for multi-level queries.
       </p>
     </div>
     <div class="mt-4">
@@ -120,7 +149,7 @@
       <h2 class="oe_slogan">Contact</h2>
       <p>
         If you are facing any issue with this module, you can contact me on
-        <span class="font-weight-bold" style="font-size: 1.5rem">github</span>
+        <span class="font-weight-bold" style="font-size: 1.5rem">Github</span>
         (<a href="https://github.com/divad1196/odoo_graphql/issues">https://github.com/divad1196/odoo_graphql/issues</a>)<br>
         <span class="p-1 bg-warning rounded">Make sure that you have read the README file and checked the examples folder first.</span>
       </p>
