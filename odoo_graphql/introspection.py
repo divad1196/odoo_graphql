@@ -180,7 +180,8 @@ def handle_schema(env, model_mapping, field, fragments={}):
     models = [
         model
         for model in env.values()
-        if not model._transient
+        # TODO: Re-add the possibility to hide transient models
+        # if not model._transient
     ]
     models_types = [
         model2type(model)

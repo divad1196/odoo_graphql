@@ -3,7 +3,7 @@
 from odoo import models, tools
 from odoo.http import request
 from odoo.service.common import exp_login
-from ..graphql_resolver import handle_graphql
+from ..graphql_resolver import handle_graphql, SPECIAL_TYPES
 from ..utils import model2name
 import json
 import base64
@@ -178,10 +178,9 @@ class GraphQLHandler(models.TransientModel):
         """
         self = self.sudo()
         fields = self.env["ir.model.fields"].search([
-            ("model_id.transient", "=", False),
-            ("ttype", "in", (
-                "date", "datetime",
-            ))
+            # TODO: Add possibility to remove transient models ?
+            # ("model_id.transient", "=", False),
+            ("ttype", "in", SPECIAL_TYPES)
         ])
         data = {}
         for f in fields:
@@ -203,9 +202,7 @@ class GraphQLHandler(models.TransientModel):
         self = self.sudo()
         fields = self.env["ir.model.fields"].search([
             ("model_id.transient", "=", False),
-            ("ttype", "in", (
-                "date", "datetime",
-            ))
+            ("ttype", "in", SPECIAL_TYPES)
         ])
         data = {}
         for f in fields:

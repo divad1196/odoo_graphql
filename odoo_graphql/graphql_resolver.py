@@ -20,9 +20,14 @@ import pytz
 from .graphql_definitions.utils import timezones
 import traceback
 import logging
+# from dateutil.parser import parse as parse_date
+
 _logger = logging.getLogger(__name__)
 
-
+SPECIAL_TYPES = (
+    "date", "datetime",
+    # "properties",
+)
 
 def filter_by_directives(node, variables={}):
     """
@@ -399,14 +404,47 @@ def _get_type_serializer_datetime(field, variables=None):
         return value.timestamp()
     return func
 
+# TODO: Add the possibility to clean up the field ?
+# Nb: The following function works
+# We won't be able to generate a graphql model for it
+# Because the properties can be different per record
+# def _get_type_serializer_properties(field, variables=None):
+#     data = args2dict(field.arguments)
+#     tz = data.get("tz")
+#     def func(value):
+#         res = {}
+#         for f_data in value:
+#             name = f_data["string"]
+#             t = f_data["type"]
+#             value = f_data["value"]
+#             if t in ("date", "datetime"):
+#                 ser = _get_type_serializer(field, t, variables=variables)
+#                 value = ser(parse_date(value))
+#             res[name] = value
+#         return res
+#     return func
+
+# def _get_type_serializer_properties(field, variables=None):
+#     def func(value):
+#         return value
+#     return func
+
 def _get_type_serializer(field, ttype, variables=None):
     if ttype == "date":
         return _get_type_serializer_date(field, variables=variables)
     if ttype == "datetime":
         return _get_type_serializer_datetime(field, variables=variables)
+    # if ttype == "properties":
+    #     return _get_type_serializer_properties(field, variables=variables)
     return lambda value: str(value)
 
 def get_type_serializer(model_name, fields, field_mapping={}):
+    """
+        field_mapping is a dict {modelname: {field: type} }
+        It contains the list of fields requiring a special serializer.
+
+        See function get_fields_mapping in model graphql.handler
+    """
     model_fields = field_mapping.get(model_name)
     if not model_fields:
         return []
