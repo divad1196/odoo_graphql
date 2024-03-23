@@ -1,0 +1,59 @@
+name: Feature Request
+description: File a feature request
+title: "[Feature]: "
+labels: ["feature"]
+assignees:
+  - divad1196
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!  
+        **NOTE**:
+        * feature requests must not serve only one's purpose. Defining the benefits is really important.
+        * The feature will be added to the latest Odoo version and maybe backported afterward.
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Description
+      description: Provide a simple description of the feature. Links are more than welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: benefits
+    attributes:
+      label: What are the benefits of adding this feature?
+      description: Describe the benefits of the feature (provide multiple benfits but be **concise** for each of them.)
+      value: |
+        * Speed: adding this feature will ... [source](#)
+        * Adoption: this feature is often supported ... [source](#)
+    validations:
+      required: true
+  - type: textarea
+    id: downsides
+    attributes:
+      label: Do you see any downsides/bottlneck with this feature?
+      description: This will make the decision making faster and improve the quality of the implementation.
+      value: |
+        * Speed: adding this feature may impact performance
+        * Compliance: this feature does not follow the standard while being widely supported
+        * ...
+  - type: textarea
+    id: usage-examples
+    attributes:
+      label: Usage
+      description: Provide one or more usage example
+      placeholder: 
+      value: |
+        * Speed: adding this feature will ... [source](#)
+        * Adoption: this feature is often supported ... [source](#)
+    validations:
+      required: true
+  # - type: checkboxes
+  #   id: terms
+  #   attributes:
+  #     label: Code of Conduct
+  #     description: By submitting this issue, you agree to follow our [Code of Conduct](https://example.com)
+  #     options:
+  #       - label: I agree to follow this project's Code of Conduct
+  #         required: true
