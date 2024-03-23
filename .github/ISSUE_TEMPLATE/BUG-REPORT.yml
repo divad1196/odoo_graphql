@@ -1,0 +1,67 @@
+name: Bug Report
+description: File a bug report
+title: "[Bug]: "
+labels: ["bug"]
+assignees:
+  - divad1196
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!  
+        **NOTE** that an unsupported feature is not a bug, please fill a feature request instead.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also details the steps to reproduce it.
+      placeholder: Tell us what you see!
+      value: ""
+    validations:
+      required: true
+  - type: textarea
+    id: what-expected
+    attributes:
+      label: What did you expect?
+      description: Also tell us, what did you expect to happen?
+      placeholder: Tell us what you see!
+      value: ""
+    validations:
+      required: true
+  - type: dropdown
+    id: odoo-version
+    attributes:
+      label: Odoo Version
+      description: On what Odoo version was the bug experienced?
+      options:
+        - 17
+        - 16
+        - 15
+        - 14
+      default: 0
+    validations:
+      required: true
+  - type: dropdown
+    id: browsers
+    attributes:
+      label: What browsers are you seeing the problem on?
+      multiple: true
+      options:
+        - Firefox
+        - Chrome
+        - Safari
+        - Microsoft Edge
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output from the server
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+  # - type: checkboxes
+  #   id: terms
+  #   attributes:
+  #     label: Code of Conduct
+  #     description: By submitting this issue, you agree to follow our [Code of Conduct](https://example.com)
+  #     options:
+  #       - label: I agree to follow this project's Code of Conduct
+  #         required: true
