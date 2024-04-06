@@ -1,0 +1,42 @@
+---
+# https://gitlab.kudelski.com/network/miscellaneous/configuration-files/-/blob/main/yamlconfig.yml?ref_type=heads
+yaml-files:
+  - '*.yaml'
+  - '*.yml'
+  - '.yamllint'
+
+rules:
+  braces:
+    forbid: true
+  colons: enable
+  commas: enable
+  comments:
+    level: warning
+  comments-indentation: disable
+    # level: warning
+  document-end: disable
+  document-start:
+    level: warning
+  empty-values: disable
+  hyphens: enable
+  indentation:
+    indent-sequences: false
+  key-duplicates: enable
+  key-ordering: disable
+  new-line-at-end-of-file: enable
+  new-lines: enable
+  octal-values: disable
+  quoted-strings: disable
+  trailing-spaces: enable
+  truthy:
+    level: warning
+  line-length:
+    max: 121
+  empty-lines:
+    max-start: 0
+    max-end: 1
+  brackets:
+    min-spaces-inside: 1
+    max-spaces-inside: 1
+    min-spaces-inside-empty: 0
+    max-spaces-inside-empty: 0

@@ -3,8 +3,8 @@
 """
 
 import json
-from libs.graphql import Graphql
 
+from libs.graphql import Graphql
 
 graphql = Graphql("http://localhost:8069", "graphql")
 graphql.login("admin", "admin")
@@ -54,7 +54,7 @@ res = graphql.graphql(query)
 print(res.content.decode())
 
 query2 = """query Tickets {
-HelpdeskTicket(domain: $domain, limit: $limit) {	
+HelpdeskTicket(domain: $domain, limit: $limit) {
     name
     description
     user: user_id @include(if: $user_info) {
@@ -71,10 +71,7 @@ HelpdeskTicket(domain: $domain, limit: $limit) {
     }
 }
 }"""
-res = graphql.graphql(query2, {
-    "domain": [],
-    "user_info": True,
-    "partner_id": True, 
-    "limit": 100
-})
+res = graphql.graphql(
+    query2, {"domain": [], "user_info": True, "partner_id": True, "limit": 100}
+)
 print(json.dumps(json.loads(res.content.decode()), indent=4))

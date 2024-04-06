@@ -1,12 +1,15 @@
-import requests
-import json
 
 """
     Use graphql query by providing credentials in the query (instead of using cookies)
 """
 
+import json
+
+import requests
+
+
 query = """query Tickets {
-HelpdeskTicket(domain: $domain, limit: $limit) {	
+HelpdeskTicket(domain: $domain, limit: $limit) {
     name
     description
     user: user_id @include(if: $user_info) {
@@ -26,21 +29,21 @@ HelpdeskTicket(domain: $domain, limit: $limit) {
 
 res = requests.post(
     "http://localhost:8069/graphql",
-    headers={
-        'Content-Type': 'application/graphql'
-    },
-    data=json.dumps({
-        "query": query,
-        "variables": {
-            "domain": [],
-            "user_info": True,
-            "partner_id": True, 
-            "limit": 100
-        },
-        "auth": {
-            "login": "dga",
-            "password": "admin",
+    headers={"Content-Type": "application/graphql"},
+    data=json.dumps(
+        {
+            "query": query,
+            "variables": {
+                "domain": [],
+                "user_info": True,
+                "partner_id": True,
+                "limit": 100,
+            },
+            "auth": {
+                "login": "dga",
+                "password": "admin",
+            },
         }
-    })
+    ),
 )
 print(json.dumps(json.loads(res.content.decode()), indent=4))

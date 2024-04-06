@@ -32,7 +32,7 @@
                         }
                     }
                 `
-                // res = await apolloClient.query({query: POSTS_QUERY}) 
+                // res = await apolloClient.query({query: POSTS_QUERY})
                 apolloClient.query({query: POSTS_QUERY}).then((res) =&gt; {
                     console.log(res)
                 })

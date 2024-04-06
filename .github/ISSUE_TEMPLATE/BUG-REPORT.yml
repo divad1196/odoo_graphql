@@ -8,7 +8,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this bug report!  
+        Thanks for taking the time to fill out this bug report!
         **NOTE** that an unsupported feature is not a bug, please fill a feature request instead.
   - type: textarea
     id: what-happened

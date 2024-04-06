@@ -8,7 +8,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this feature request!  
+        Thanks for taking the time to fill out this feature request!
         **NOTE**:
         * feature requests must not serve only one's purpose. Defining the benefits is really important.
         * The feature will be added to the latest Odoo version and maybe backported afterward.
@@ -43,7 +43,7 @@ body:
     attributes:
       label: Usage
       description: Provide one or more usage example
-      placeholder: 
+      placeholder:
       value: |
         * Speed: adding this feature will ... [source](#)
         * Adoption: this feature is often supported ... [source](#)

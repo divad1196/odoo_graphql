@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
+import json
+import logging
 
 from odoo import models, tools
 from odoo.http import request
 from odoo.service.common import exp_login
-from ..graphql_resolver import handle_graphql, SPECIAL_TYPES
+
+from ..graphql_resolver import SPECIAL_TYPES, handle_graphql
 from ..utils import model2name
-import json
-import base64
-
-
-import logging
 
 _logger = logging.getLogger(__name__)
 
@@ -18,10 +15,13 @@ class GraphQLHandler(models.TransientModel):
     _name = "graphql.handler"
 
     def has_introspection(self):
-        introspection = self.env['ir.config_parameter'].sudo().get_param(
-            'odoo_graphql.introspection', ""
-        ).strip().lower() == "true"
-        return introspection
+        introspection = (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("odoo_graphql.introspection", "")
+        )
+        introspection = introspection.strip().lower()
+        return introspection == "true"
 
     def handle_query(self, query):
         if isinstance(query, bytes):
@@ -46,7 +46,8 @@ class GraphQLHandler(models.TransientModel):
                     if login and password:
                         uid = exp_login(
                             self.env.cr.dbname,
-                            login, password,
+                            login,
+                            password,
                         )
                         self = self.with_user(uid)
             except Exception as e:
@@ -54,14 +55,12 @@ class GraphQLHandler(models.TransientModel):
                     "errors": {"message": str(e)}  # + traceback.format_exc()
                 }
         except Exception:  # We may have pure graphql query
-            pass
-        response = self.handle_graphql(
+            _logger.debug("Pure graphql query received")
+        return self.handle_graphql(
             query,
             variables=variables,
             operation=operation,
         )
-        return response
-
 
     def _handle_graphql(
         self,
@@ -82,7 +81,7 @@ class GraphQLHandler(models.TransientModel):
             operation=operation,
             field_mapping=field_mapping,
             allowed_fields=allowed_fields,
-            introspection=introspection
+            introspection=introspection,
         )
 
     def handle_graphql(
@@ -92,13 +91,12 @@ class GraphQLHandler(models.TransientModel):
         operation=None,
     ):
         model_mapping = self.get_model_mapping()
-        _logger.info(model_mapping)
         field_mapping = self.get_fields_mapping()
         allowed_fields = self.get_allowed_fields()
         extra_variables = self.get_extra_variables()
         variables = {**extra_variables, **variables}
 
-        response = self._handle_graphql(
+        return self._handle_graphql(
             query,
             model_mapping,
             variables=variables,
@@ -106,7 +104,6 @@ class GraphQLHandler(models.TransientModel):
             field_mapping=field_mapping,
             allowed_fields=allowed_fields,
         )
-        return response
 
     # @tools.ormcache()  # Unable to use a closed cursor, we can not cache cursor and thus models
     def get_model_mapping(self):
@@ -119,7 +116,6 @@ class GraphQLHandler(models.TransientModel):
 
     @tools.ormcache()
     def _get_allowed_models(self, mode="read"):
-
         ir_model_ids = (
             self.sudo()
             .env["ir.model"]
@@ -150,12 +146,11 @@ class GraphQLHandler(models.TransientModel):
         return ir_model_ids.mapped("model")
 
     def get_allowed_models(self, mode="read"):
-        ir_model_ids = (
+        return (
             self.sudo()
             .env["ir.model"]
             .search([("model", "in", self._get_allowed_models())])
         )
-        return ir_model_ids
 
     @tools.ormcache()
     def get_allowed_fields(self):
@@ -165,24 +160,26 @@ class GraphQLHandler(models.TransientModel):
         # Empty list allows no field.
         # e.g.: {"helpdesk.ticket": []}
         return {}
-    
+
     @tools.ormcache()
     def get_fields_mapping(self):
         """
-            return a mapping per model of their fields'type.
-            {
-                "sale.order": {
-                    "create_date": "date"
-                }
+        return a mapping per model of their fields'type.
+        {
+            "sale.order": {
+                "create_date": "date"
             }
-            The goal is to be able to call the correct serializer
+        }
+        The goal is to be able to call the correct serializer
         """
         self = self.sudo()
-        fields = self.env["ir.model.fields"].search([
-            # TODO: Add possibility to remove transient models ?
-            # ("model_id.transient", "=", False),
-            ("ttype", "in", SPECIAL_TYPES)
-        ])
+        fields = self.env["ir.model.fields"].search(
+            [
+                # TODO: Add possibility to remove transient models ?
+                # ("model_id.transient", "=", False),
+                ("ttype", "in", SPECIAL_TYPES)
+            ]
+        )
         data = {}
         for f in fields:
             model = data.setdefault(f.model_id.model, {})
@@ -192,19 +189,18 @@ class GraphQLHandler(models.TransientModel):
     @tools.ormcache()
     def get_fields_mapping_by_type(self):
         """
-            return a mapping per model of their fields group by type.
-            {
-                "sale.order": {
-                    "date": ["create_date"]
-                }
+        return a mapping per model of their fields group by type.
+        {
+            "sale.order": {
+                "date": ["create_date"]
             }
-            The goal is to be able to call the correct serializer
+        }
+        The goal is to be able to call the correct serializer
         """
         self = self.sudo()
-        fields = self.env["ir.model.fields"].search([
-            ("model_id.transient", "=", False),
-            ("ttype", "in", SPECIAL_TYPES)
-        ])
+        fields = self.env["ir.model.fields"].search(
+            [("model_id.transient", "=", False), ("ttype", "in", SPECIAL_TYPES)]
+        )
         data = {}
         for f in fields:
             model = data.setdefault(f.model_id.model, {})
