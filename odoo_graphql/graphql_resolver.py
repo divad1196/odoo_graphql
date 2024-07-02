@@ -380,6 +380,8 @@ def _get_type_serializer_date(field, variables=None):
     data = args2dict(field.arguments)
     fmt = data.get("format")
     def func(value):
+        if value is False:
+            return False
         if fmt:
             return value.strftime(fmt)
         return value.toordinal()
@@ -392,6 +394,8 @@ def _get_type_serializer_datetime(field, variables=None):
         tz = pytz.timezone(tz)
     fmt = data.get("format")
     def func(value):
+        if value is False:
+            return False
         if tz:
             value = value.replace(tzinfo=pytz.utc).astimezone(tz)
         if fmt:
