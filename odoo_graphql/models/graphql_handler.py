@@ -57,7 +57,7 @@ class GraphQLHandler(models.TransientModel):
                     "errors": {"message": str(e)}  # + traceback.format_exc()
                 }
         except Exception:  # We may have pure graphql query
-            pass
+            logging.debug("Pure query received")
         response = self.handle_graphql(
             query,
             variables=variables,

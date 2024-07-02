@@ -1,9 +1,11 @@
-import requests
-import json
 
 """
     Use graphql query by providing credentials in the query (instead of using cookies)
 """
+
+import requests
+import json
+
 
 query = """query Tickets {
 HelpdeskTicket(domain: $domain, limit: $limit) {

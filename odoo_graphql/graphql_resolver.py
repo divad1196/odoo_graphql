@@ -261,14 +261,6 @@ def slice_result(res, limit=None, offset=None):
     return res[offset:limit]
 
 
-def slice_result(res, limit=None, offset=None):
-    if limit is None and offset is None:
-        return res
-    offset = offset or 0
-    limit = (limit or 0) + offset
-    return res[offset:limit]
-
-
 def default_empty_subgather(ids):
     if ids is False or isinstance(ids, int):
         return None
@@ -530,7 +522,7 @@ def parse_model_field(
             if not frag:
                 continue
             for f in frag.selection_set.selections:
-                fields.append(f)
+                fields.append(f)  # noqa: PERF402
 
     # Remove fields that are not allowed for the user
     # Nb: This fields can be defined by a developer, this is not native in Odoo
@@ -642,13 +634,12 @@ def value2py(value, variables=None):
         if isinstance(value, ListValueNode):
             return [value2py(v, variables=variables) for v in value.values]
         if isinstance(value, ObjectValueNode):
-            return dict(
-                (
-                    value2py(f.name, variables=variables),
-                    value2py(f.value, variables=variables),
+            return {
+                value2py(f.name, variables=variables): value2py(
+                    f.value, variables=variables
                 )
                 for f in value.fields  # list of ObjectFieldNode
-            )
+            }
         # For unknown reason, integers and floats are received as string,
         # but not booleans nor list
         if isinstance(value, IntValueNode):

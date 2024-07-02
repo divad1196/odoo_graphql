@@ -189,7 +189,7 @@ def handle_schema(env, model_mapping, field, fragments={}):
         "enumValues": None,
         "possibleTypes": None,
     }
-    types = ALL_TYPES + [query_type] + models_types
+    types = [*ALL_TYPES, query_type, *models_types]
     data = {
         "directives": DIRECTIVES,
         "mutationType": None,

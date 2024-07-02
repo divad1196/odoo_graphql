@@ -53,5 +53,4 @@ def resolve_data(node, data):
             value = resolve_data(f, _exec_lazy(data.get(key)))
             result[key] = value
         return result
-    for d in data:
-        return [resolve_data(node, d)]
+    return [resolve_data(node, d) for d in data]
