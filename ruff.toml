@@ -1,0 +1,91 @@
+fix = true
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    "odoo_graphql_test",
+    "odoo_graphql/examples",
+
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+# Same as Black.
+line-length = 88
+indent-width = 4
+
+[lint]
+extend-select = [
+    "I",    # isort
+    # "D",    # pydocstyle
+    "S",    # flake8-bandit (Security check), prefer to use bandit directly, it provides better feedback
+    "PERF", # Perflint
+    # "ERA",  # Eradicate
+    "C90",  # Complexity Check
+    # "FIX",  # flake8-fixme
+    # "TD",   # flake8-todos
+    "N",    # pep8-naming
+    "COM",  # flake8-commas
+    "C4",   # flake8-comprehensions
+    "ISC",  # flake8-implicit-str-concat
+    "INP",  # flake8-no-pep420
+    "PIE",  # flake8-pie
+    "Q",    # flake8-quotes
+    "RET",  # flake8-return
+    "SLF",  # flake8-self
+    "SIM",  # flake8-simplify
+    "TID",  # flake8-tidy-imports
+    # "ARG",  # flake8-unused-arguments
+    "PTH",  # flake8-use-pathlib
+    "FLY",  # Flynt
+    # "FURB", # Refurb  (requires preview mode)
+    "UP",   # PyUpgrade
+    # "PL",   # Pylint
+    # "TRY",  # tryceratops
+    "RUF",  # Ruff-specific rules
+]
+
+ignore = [
+    "PERF203",  # try-except in loop
+    "SIM112",   # Use capitalized environment variable
+    "COM812",   # Conflict with formatter
+    "ISC001",   # Conflict with formatter
+    "SLF001",   # Many accesses to _fields, _name, ...
+    "TID252",   # Relative imports are useful with Odoo
+]
+
+[extend-per-file-ignores]
+"__init__.py" = ["F401"]
+
+[lint.mccabe]
+max-complexity = 20
+
+[format]
+# Like Black, use double quotes for strings.
+quote-style = "double"
+
+# Like Black, indent with spaces, rather than tabs.
+indent-style = "space"
+
+# Like Black, respect magic trailing commas.
+skip-magic-trailing-comma = false
+
+# Like Black, automatically detect the appropriate line ending.
+line-ending = "auto"
