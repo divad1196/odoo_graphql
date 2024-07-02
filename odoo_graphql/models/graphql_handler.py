@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
+import json
+import logging
 
 from odoo import models, tools
 from odoo.http import request
 from odoo.service.common import exp_login
+
 from ..graphql_resolver import handle_graphql
 from ..utils import model2name
-import json
-import base64
-
-
-import logging
 
 _logger = logging.getLogger(__name__)
 
@@ -18,9 +15,14 @@ class GraphQLHandler(models.TransientModel):
     _name = "graphql.handler"
 
     def has_introspection(self):
-        introspection = self.env['ir.config_parameter'].sudo().get_param(
-            'odoo_graphql.introspection', ""
-        ).strip().lower() == "true"
+        introspection = (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("odoo_graphql.introspection", "")
+            .strip()
+            .lower()
+            == "true"
+        )
         return introspection
 
     def handle_query(self, query):
@@ -46,7 +48,8 @@ class GraphQLHandler(models.TransientModel):
                     if login and password:
                         uid = exp_login(
                             self.env.cr.dbname,
-                            login, password,
+                            login,
+                            password,
                         )
                         self = self.with_user(uid)
             except Exception as e:
@@ -61,7 +64,6 @@ class GraphQLHandler(models.TransientModel):
             operation=operation,
         )
         return response
-
 
     def _handle_graphql(
         self,
@@ -82,7 +84,7 @@ class GraphQLHandler(models.TransientModel):
             operation=operation,
             field_mapping=field_mapping,
             allowed_fields=allowed_fields,
-            introspection=introspection
+            introspection=introspection,
         )
 
     def handle_graphql(
@@ -118,7 +120,6 @@ class GraphQLHandler(models.TransientModel):
 
     @tools.ormcache()
     def _get_allowed_models(self, mode="read"):
-
         ir_model_ids = (
             self.sudo()
             .env["ir.model"]
@@ -164,25 +165,32 @@ class GraphQLHandler(models.TransientModel):
         # Empty list allows no field.
         # e.g.: {"helpdesk.ticket": []}
         return {}
-    
+
     @tools.ormcache()
     def get_fields_mapping(self):
         """
-            return a mapping per model of their fields'type.
-            {
-                "sale.order": {
-                    "create_date": "date"
-                }
+        return a mapping per model of their fields'type.
+        {
+            "sale.order": {
+                "create_date": "date"
             }
-            The goal is to be able to call the correct serializer
+        }
+        The goal is to be able to call the correct serializer
         """
         self = self.sudo()
-        fields = self.env["ir.model.fields"].search([
-            ("model_id.transient", "=", False),
-            ("ttype", "in", (
-                "date", "datetime",
-            ))
-        ])
+        fields = self.env["ir.model.fields"].search(
+            [
+                ("model_id.transient", "=", False),
+                (
+                    "ttype",
+                    "in",
+                    (
+                        "date",
+                        "datetime",
+                    ),
+                ),
+            ]
+        )
         data = {}
         for f in fields:
             model = data.setdefault(f.model_id.model, {})
@@ -192,21 +200,28 @@ class GraphQLHandler(models.TransientModel):
     @tools.ormcache()
     def get_fields_mapping_by_type(self):
         """
-            return a mapping per model of their fields group by type.
-            {
-                "sale.order": {
-                    "date": ["create_date"]
-                }
+        return a mapping per model of their fields group by type.
+        {
+            "sale.order": {
+                "date": ["create_date"]
             }
-            The goal is to be able to call the correct serializer
+        }
+        The goal is to be able to call the correct serializer
         """
         self = self.sudo()
-        fields = self.env["ir.model.fields"].search([
-            ("model_id.transient", "=", False),
-            ("ttype", "in", (
-                "date", "datetime",
-            ))
-        ])
+        fields = self.env["ir.model.fields"].search(
+            [
+                ("model_id.transient", "=", False),
+                (
+                    "ttype",
+                    "in",
+                    (
+                        "date",
+                        "datetime",
+                    ),
+                ),
+            ]
+        )
         data = {}
         for f in fields:
             model = data.setdefault(f.model_id.model, {})

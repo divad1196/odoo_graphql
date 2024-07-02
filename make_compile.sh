@@ -17,7 +17,7 @@ done
 for pyc in $(find $MODULE -name '*cpython*.pyc');
 do
     NEW_NAME="$(echo $pyc | sed 's/cpython.*\.//g')"
-    echo "$pyc -> $NEW_NAME" 
+    echo "$pyc -> $NEW_NAME"
     mv "$pyc" $NEW_NAME
 done
 

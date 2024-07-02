@@ -19,4 +19,4 @@
 * Use the correct [response format](https://spec.graphql.org/June2018/#sec-Response-Format) (OK?)
 * [Subscription](https://dgraph.io/docs/graphql/subscriptions/) => Odoo does not support websocket currently
 
-* 
+*

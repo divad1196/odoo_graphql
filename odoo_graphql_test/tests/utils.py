@@ -25,4 +25,3 @@ def firstMatching(data, predicat):
         if predicat(x):
             return x
     return None
-

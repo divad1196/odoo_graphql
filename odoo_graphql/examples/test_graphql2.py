@@ -6,7 +6,7 @@ import json
 """
 
 query = """query Tickets {
-HelpdeskTicket(domain: $domain, limit: $limit) {	
+HelpdeskTicket(domain: $domain, limit: $limit) {
     name
     description
     user: user_id @include(if: $user_info) {
@@ -34,7 +34,7 @@ res = requests.post(
         "variables": {
             "domain": [],
             "user_info": True,
-            "partner_id": True, 
+            "partner_id": True,
             "limit": 100
         },
         "auth": {

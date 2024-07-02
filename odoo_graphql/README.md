@@ -9,7 +9,7 @@ This module takes into account any installed modules and use the Odoo permission
 
 ```javascript
 query Tickets {
-    HelpdeskTicket(domain: $domain, limit: $limit) {	
+    HelpdeskTicket(domain: $domain, limit: $limit) {
         name
         description
         user: user_id @include(if: $user_info) {
@@ -33,7 +33,7 @@ To use the query:
 ```python
 requests.get("https://myodoo.com/graphql",
     # Header not required currently but recommended
-    headers={"Content-type": "application/graphql"},  
+    headers={"Content-type": "application/graphql"},
     data={
         "query": myquery,
         "variables": {},  # Optional
@@ -143,8 +143,3 @@ odoo.graphql(
 ```
 
 Nb: Those works using the defaults routes of Odoo. If you have changed them using your proxy, you will need to make your own _odoo_builder_. To help you, the __odoo_utils_ structure is made for you.
-
-
-
-
-
