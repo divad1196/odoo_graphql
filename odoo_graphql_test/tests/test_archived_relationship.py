@@ -7,7 +7,7 @@ from .utils import open_query, contains, firstMatching, pretty_print
 
 class TestArchivedRelationship(TestGraphQlCommon):
 
-      
+
     def test_many2many_relationship(self):
         with open_query("contacts.gql") as f:
             query = f.read()
@@ -30,4 +30,3 @@ class TestArchivedRelationship(TestGraphQlCommon):
         user.active = False
         res = firstMatching(self.handle_query(query)["data"]["ResPartner"], lambda p: p["id"] == partner.id)
         user.active = True
-

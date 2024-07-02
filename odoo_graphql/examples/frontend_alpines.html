@@ -18,7 +18,7 @@
     ></script>
   </head>
   <body>
-    <script src="libs/graphql.js"></script> 
+    <script src="libs/graphql.js"></script>
     <script>
         const url = "http://192.168.1.113:8100";
         const odoo = odoo_builder(url, "graphql");
@@ -26,7 +26,7 @@
         async function getTickets(variables) {
             let data = await odoo.graphql(`
                 query Tickets {
-                    HelpdeskTicket(domain: $domain, limit: $limit) {	
+                    HelpdeskTicket(domain: $domain, limit: $limit) {
                         name
                         description
                         user: user_id @include(if: $user_info) {
@@ -110,7 +110,7 @@
         async function test2(parameters) {
             let data = await odoo.graphql(`
                 query Test {
-                    SaleOrder(domain: $domain, limit: $limit) {	
+                    SaleOrder(domain: $domain, limit: $limit) {
                         name
                         state
                         partner_id @include(if: $partner_id)  {
@@ -146,7 +146,7 @@
         };
         /*
             let ticket = (await test3({"name": "test", description: "hello world"}))["tickets"][0]  // Create a new ticket
-            await test3({domain: [["id", "=", ticket.id]], "name": "name changed", description: "hello world2"})  // Update the 
+            await test3({domain: [["id", "=", ticket.id]], "name": "name changed", description: "hello world2"})  // Update the
         */
 
         async function odoo_login(login, password) {
@@ -164,7 +164,7 @@
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        
+
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
             <li class="nav-item active">
@@ -261,7 +261,7 @@
             </template>
         </div>
     </div>
-    
+
 
   </body>
   <script>

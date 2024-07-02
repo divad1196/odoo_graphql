@@ -9,7 +9,7 @@ This module takes into account any installed modules and use the Odoo permission
 
 ```javascript
 query Tickets {
-    HelpdeskTicket(domain: $domain, limit: $limit) {	
+    HelpdeskTicket(domain: $domain, limit: $limit) {
         name
         description
         user: user_id @include(if: $user_info) {
@@ -117,8 +117,3 @@ odoo.graphql(
 ```
 
 Nb: Those works using the defaults routes of Odoo. If you have changed them using your proxy, you will need to make your own _odoo_builder_. To help you, the __odoo_utils_ structure is made for you.
-
-
-
-
-

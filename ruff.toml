@@ -69,6 +69,7 @@ ignore = [
     "ISC001",   # Conflict with formatter
     "SLF001",   # Many accesses to _fields, _name, ...
     "TID252",   # Relative imports are useful with Odoo
+    "RET504",   # Allow unnecessary assignement before return
 ]
 
 [extend-per-file-ignores]
