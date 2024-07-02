@@ -8,7 +8,7 @@ BOOLEAN = {
     "inputFields": None,
     "interfaces": None,
     "enumValues": None,
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 # TODO: Date, Datetime, Decimal and Int
@@ -22,18 +22,18 @@ STRING = {
     "inputFields": None,
     "interfaces": None,
     "enumValues": None,
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 ID = {
     "kind": "SCALAR",
     "name": "ID",
-    "description": "The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `\"4\"`) or integer (such as `4`) input value will be accepted as an ID.",
+    "description": 'The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `"4"`) or integer (such as `4`) input value will be accepted as an ID.',
     "fields": None,
     "inputFields": None,
     "interfaces": None,
     "enumValues": None,
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 INT = {
@@ -44,7 +44,7 @@ INT = {
     "inputFields": None,
     "interfaces": None,
     "enumValues": None,
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 ANY = {
@@ -55,7 +55,7 @@ ANY = {
     "inputFields": None,
     "interfaces": None,
     "enumValues": None,
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 SERVICE = {
@@ -67,19 +67,15 @@ SERVICE = {
             "name": "sdl",
             "description": "The sdl representing the federated service capabilities. Includes federation directives, removes federation types, and includes rest of full schema after schema directives have been applied",
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         }
     ],
     "inputFields": None,
     "interfaces": [],
     "enumValues": None,
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 SCHEMA = {
@@ -91,13 +87,9 @@ SCHEMA = {
             "name": "description",
             "description": None,
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "types",
@@ -112,16 +104,12 @@ SCHEMA = {
                     "ofType": {
                         "kind": "NON_NULL",
                         "name": None,
-                        "ofType": {
-                            "kind": "OBJECT",
-                            "name": "__Type",
-                            "ofType": None
-                        }
-                    }
-                }
+                        "ofType": {"kind": "OBJECT", "name": "__Type", "ofType": None},
+                    },
+                },
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "queryType",
@@ -130,38 +118,26 @@ SCHEMA = {
             "type": {
                 "kind": "NON_NULL",
                 "name": None,
-                "ofType": {
-                    "kind": "OBJECT",
-                    "name": "__Type",
-                    "ofType": None
-                }
+                "ofType": {"kind": "OBJECT", "name": "__Type", "ofType": None},
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "mutationType",
             "description": "If this server supports mutation, the type that mutation operations will be rooted at.",
             "args": [],
-            "type": {
-                "kind": "OBJECT",
-                "name": "__Type",
-                "ofType": None
-            },
+            "type": {"kind": "OBJECT", "name": "__Type", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "subscriptionType",
             "description": "If this server support subscription, the type that subscription operations will be rooted at.",
             "args": [],
-            "type": {
-                "kind": "OBJECT",
-                "name": "__Type",
-                "ofType": None
-            },
+            "type": {"kind": "OBJECT", "name": "__Type", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "directives",
@@ -179,19 +155,19 @@ SCHEMA = {
                         "ofType": {
                             "kind": "OBJECT",
                             "name": "__Directive",
-                            "ofType": None
-                        }
-                    }
-                }
+                            "ofType": None,
+                        },
+                    },
+                },
             },
             "isDeprecated": False,
-            "deprecationReason": None
-        }
+            "deprecationReason": None,
+        },
     ],
     "inputFields": None,
     "interfaces": [],
     "enumValues": None,
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 TYPE = {
@@ -206,50 +182,34 @@ TYPE = {
             "type": {
                 "kind": "NON_NULL",
                 "name": None,
-                "ofType": {
-                    "kind": "ENUM",
-                    "name": "__TypeKind",
-                    "ofType": None
-                }
+                "ofType": {"kind": "ENUM", "name": "__TypeKind", "ofType": None},
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "name",
             "description": None,
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "description",
             "description": None,
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "specifiedByUrl",
             "description": None,
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "fields",
@@ -258,12 +218,8 @@ TYPE = {
                 {
                     "name": "includeDeprecated",
                     "description": None,
-                    "type": {
-                        "kind": "SCALAR",
-                        "name": "Boolean",
-                        "ofType": None
-                    },
-                    "defaultValue": "False"
+                    "type": {"kind": "SCALAR", "name": "Boolean", "ofType": None},
+                    "defaultValue": "False",
                 }
             ],
             "type": {
@@ -272,15 +228,11 @@ TYPE = {
                 "ofType": {
                     "kind": "NON_NULL",
                     "name": None,
-                    "ofType": {
-                        "kind": "OBJECT",
-                        "name": "__Field",
-                        "ofType": None
-                    }
-                }
+                    "ofType": {"kind": "OBJECT", "name": "__Field", "ofType": None},
+                },
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "interfaces",
@@ -292,15 +244,11 @@ TYPE = {
                 "ofType": {
                     "kind": "NON_NULL",
                     "name": None,
-                    "ofType": {
-                        "kind": "OBJECT",
-                        "name": "__Type",
-                        "ofType": None
-                    }
-                }
+                    "ofType": {"kind": "OBJECT", "name": "__Type", "ofType": None},
+                },
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "possibleTypes",
@@ -312,15 +260,11 @@ TYPE = {
                 "ofType": {
                     "kind": "NON_NULL",
                     "name": None,
-                    "ofType": {
-                        "kind": "OBJECT",
-                        "name": "__Type",
-                        "ofType": None
-                    }
-                }
+                    "ofType": {"kind": "OBJECT", "name": "__Type", "ofType": None},
+                },
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "enumValues",
@@ -329,12 +273,8 @@ TYPE = {
                 {
                     "name": "includeDeprecated",
                     "description": None,
-                    "type": {
-                        "kind": "SCALAR",
-                        "name": "Boolean",
-                        "ofType": None
-                    },
-                    "defaultValue": "False"
+                    "type": {"kind": "SCALAR", "name": "Boolean", "ofType": None},
+                    "defaultValue": "False",
                 }
             ],
             "type": {
@@ -343,15 +283,11 @@ TYPE = {
                 "ofType": {
                     "kind": "NON_NULL",
                     "name": None,
-                    "ofType": {
-                        "kind": "OBJECT",
-                        "name": "__EnumValue",
-                        "ofType": None
-                    }
-                }
+                    "ofType": {"kind": "OBJECT", "name": "__EnumValue", "ofType": None},
+                },
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "inputFields",
@@ -360,12 +296,8 @@ TYPE = {
                 {
                     "name": "includeDeprecated",
                     "description": None,
-                    "type": {
-                        "kind": "SCALAR",
-                        "name": "Boolean",
-                        "ofType": None
-                    },
-                    "defaultValue": "False"
+                    "type": {"kind": "SCALAR", "name": "Boolean", "ofType": None},
+                    "defaultValue": "False",
                 }
             ],
             "type": {
@@ -377,30 +309,26 @@ TYPE = {
                     "ofType": {
                         "kind": "OBJECT",
                         "name": "__InputValue",
-                        "ofType": None
-                    }
-                }
+                        "ofType": None,
+                    },
+                },
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "ofType",
             "description": None,
             "args": [],
-            "type": {
-                "kind": "OBJECT",
-                "name": "__Type",
-                "ofType": None
-            },
+            "type": {"kind": "OBJECT", "name": "__Type", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
-        }
+            "deprecationReason": None,
+        },
     ],
     "inputFields": None,
     "interfaces": [],
     "enumValues": None,
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 TYPE_KIND = {
@@ -415,52 +343,52 @@ TYPE_KIND = {
             "name": "SCALAR",
             "description": "Indicates this type is a scalar.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "OBJECT",
             "description": "Indicates this type is an object. `fields` and `interfaces` are valid fields.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "INTERFACE",
             "description": "Indicates this type is an interface. `fields`, `interfaces`, and `possibleTypes` are valid fields.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "UNION",
             "description": "Indicates this type is a union. `possibleTypes` is a valid field.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "ENUM",
             "description": "Indicates this type is an enum. `enumValues` is a valid field.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "INPUT_OBJECT",
             "description": "Indicates this type is an input object. `inputFields` is a valid field.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "LIST",
             "description": "Indicates this type is a list. `ofType` is a valid field.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "NON_NULL",
             "description": "Indicates this type is a non-None. `ofType` is a valid field.",
             "isDeprecated": False,
-            "deprecationReason": None
-        }
+            "deprecationReason": None,
+        },
     ],
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 FIELD = {
@@ -475,26 +403,18 @@ FIELD = {
             "type": {
                 "kind": "NON_NULL",
                 "name": None,
-                "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": None
-                }
+                "ofType": {"kind": "SCALAR", "name": "String", "ofType": None},
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "description",
             "description": None,
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "args",
@@ -503,12 +423,8 @@ FIELD = {
                 {
                     "name": "includeDeprecated",
                     "description": None,
-                    "type": {
-                        "kind": "SCALAR",
-                        "name": "Boolean",
-                        "ofType": None
-                    },
-                    "defaultValue": "False"
+                    "type": {"kind": "SCALAR", "name": "Boolean", "ofType": None},
+                    "defaultValue": "False",
                 }
             ],
             "type": {
@@ -523,13 +439,13 @@ FIELD = {
                         "ofType": {
                             "kind": "OBJECT",
                             "name": "__InputValue",
-                            "ofType": None
-                        }
-                    }
-                }
+                            "ofType": None,
+                        },
+                    },
+                },
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "type",
@@ -538,14 +454,10 @@ FIELD = {
             "type": {
                 "kind": "NON_NULL",
                 "name": None,
-                "ofType": {
-                    "kind": "OBJECT",
-                    "name": "__Type",
-                    "ofType": None
-                }
+                "ofType": {"kind": "OBJECT", "name": "__Type", "ofType": None},
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "isDeprecated",
@@ -554,32 +466,24 @@ FIELD = {
             "type": {
                 "kind": "NON_NULL",
                 "name": None,
-                "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Boolean",
-                    "ofType": None
-                }
+                "ofType": {"kind": "SCALAR", "name": "Boolean", "ofType": None},
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "deprecationReason",
             "description": None,
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
-        }
+            "deprecationReason": None,
+        },
     ],
     "inputFields": None,
     "interfaces": [],
     "enumValues": None,
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 INPUT_VALUE = {
@@ -594,26 +498,18 @@ INPUT_VALUE = {
             "type": {
                 "kind": "NON_NULL",
                 "name": None,
-                "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": None
-                }
+                "ofType": {"kind": "SCALAR", "name": "String", "ofType": None},
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "description",
             "description": None,
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "type",
@@ -622,26 +518,18 @@ INPUT_VALUE = {
             "type": {
                 "kind": "NON_NULL",
                 "name": None,
-                "ofType": {
-                    "kind": "OBJECT",
-                    "name": "__Type",
-                    "ofType": None
-                }
+                "ofType": {"kind": "OBJECT", "name": "__Type", "ofType": None},
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "defaultValue",
             "description": "A GraphQL-formatted string representing the default value for this input value.",
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "isDeprecated",
@@ -650,32 +538,24 @@ INPUT_VALUE = {
             "type": {
                 "kind": "NON_NULL",
                 "name": None,
-                "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Boolean",
-                    "ofType": None
-                }
+                "ofType": {"kind": "SCALAR", "name": "Boolean", "ofType": None},
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "deprecationReason",
             "description": None,
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
-        }
+            "deprecationReason": None,
+        },
     ],
     "inputFields": None,
     "interfaces": [],
     "enumValues": None,
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 ENUM_VALUE = {
@@ -690,26 +570,18 @@ ENUM_VALUE = {
             "type": {
                 "kind": "NON_NULL",
                 "name": None,
-                "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": None
-                }
+                "ofType": {"kind": "SCALAR", "name": "String", "ofType": None},
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "description",
             "description": None,
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "isDeprecated",
@@ -718,32 +590,24 @@ ENUM_VALUE = {
             "type": {
                 "kind": "NON_NULL",
                 "name": None,
-                "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Boolean",
-                    "ofType": None
-                }
+                "ofType": {"kind": "SCALAR", "name": "Boolean", "ofType": None},
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "deprecationReason",
             "description": None,
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
-        }
+            "deprecationReason": None,
+        },
     ],
     "inputFields": None,
     "interfaces": [],
     "enumValues": None,
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 DIRECTIVE = {
@@ -758,26 +622,18 @@ DIRECTIVE = {
             "type": {
                 "kind": "NON_NULL",
                 "name": None,
-                "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": None
-                }
+                "ofType": {"kind": "SCALAR", "name": "String", "ofType": None},
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "description",
             "description": None,
             "args": [],
-            "type": {
-                "kind": "SCALAR",
-                "name": "String",
-                "ofType": None
-            },
+            "type": {"kind": "SCALAR", "name": "String", "ofType": None},
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "isRepeatable",
@@ -786,14 +642,10 @@ DIRECTIVE = {
             "type": {
                 "kind": "NON_NULL",
                 "name": None,
-                "ofType": {
-                    "kind": "SCALAR",
-                    "name": "Boolean",
-                    "ofType": None
-                }
+                "ofType": {"kind": "SCALAR", "name": "Boolean", "ofType": None},
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "locations",
@@ -811,13 +663,13 @@ DIRECTIVE = {
                         "ofType": {
                             "kind": "ENUM",
                             "name": "__DirectiveLocation",
-                            "ofType": None
-                        }
-                    }
-                }
+                            "ofType": None,
+                        },
+                    },
+                },
             },
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "args",
@@ -826,12 +678,8 @@ DIRECTIVE = {
                 {
                     "name": "includeDeprecated",
                     "description": None,
-                    "type": {
-                        "kind": "SCALAR",
-                        "name": "Boolean",
-                        "ofType": None
-                    },
-                    "defaultValue": "False"
+                    "type": {"kind": "SCALAR", "name": "Boolean", "ofType": None},
+                    "defaultValue": "False",
                 }
             ],
             "type": {
@@ -846,19 +694,19 @@ DIRECTIVE = {
                         "ofType": {
                             "kind": "OBJECT",
                             "name": "__InputValue",
-                            "ofType": None
-                        }
-                    }
-                }
+                            "ofType": None,
+                        },
+                    },
+                },
             },
             "isDeprecated": False,
-            "deprecationReason": None
-        }
+            "deprecationReason": None,
+        },
     ],
     "inputFields": None,
     "interfaces": [],
     "enumValues": None,
-    "possibleTypes": None
+    "possibleTypes": None,
 }
 
 DIRECTIVE_LOCATION = {
@@ -873,120 +721,119 @@ DIRECTIVE_LOCATION = {
             "name": "QUERY",
             "description": "Location adjacent to a query operation.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "MUTATION",
             "description": "Location adjacent to a mutation operation.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "SUBSCRIPTION",
             "description": "Location adjacent to a subscription operation.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "FIELD",
             "description": "Location adjacent to a field.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "FRAGMENT_DEFINITION",
             "description": "Location adjacent to a fragment definition.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "FRAGMENT_SPREAD",
             "description": "Location adjacent to a fragment spread.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "INLINE_FRAGMENT",
             "description": "Location adjacent to an inline fragment.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "VARIABLE_DEFINITION",
             "description": "Location adjacent to a variable definition.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "SCHEMA",
             "description": "Location adjacent to a schema definition.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "SCALAR",
             "description": "Location adjacent to a scalar definition.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "OBJECT",
             "description": "Location adjacent to an object type definition.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "FIELD_DEFINITION",
             "description": "Location adjacent to a field definition.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "ARGUMENT_DEFINITION",
             "description": "Location adjacent to an argument definition.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "INTERFACE",
             "description": "Location adjacent to an interface definition.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "UNION",
             "description": "Location adjacent to a union definition.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "ENUM",
             "description": "Location adjacent to an enum definition.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "ENUM_VALUE",
             "description": "Location adjacent to an enum value definition.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "INPUT_OBJECT",
             "description": "Location adjacent to an input object type definition.",
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         },
         {
             "name": "INPUT_FIELD_DEFINITION",
             "description": "Location adjacent to an input object field definition.",
             "isDeprecated": False,
-            "deprecationReason": None
-        }
+            "deprecationReason": None,
+        },
     ],
-    "possibleTypes": None
+    "possibleTypes": None,
 }
-
 
 
 DATETIME_TZ_ENUM = {
@@ -1001,13 +848,12 @@ DATETIME_TZ_ENUM = {
             "name": tz,
             "description": description,
             "isDeprecated": False,
-            "deprecationReason": None
+            "deprecationReason": None,
         }
         for tz, description in timezones.items()
     ],
-    "possibleTypes": None
+    "possibleTypes": None,
 }
-
 
 
 # QUERY = {

@@ -4,7 +4,7 @@
 from odoo.addons.product.tests.common import TestProductCommon
 
 class TestGraphQlCommonWithoutIntrospection(TestProductCommon):
-    
+
     def handle_query(self, *args, **kwargs):
         return self.env["graphql.handler"].handle_graphql(*args, **kwargs)
         # return self.env["graphql.handler"].handle_query(*args, **kwargs)
@@ -26,4 +26,3 @@ class TestGraphQlCommon(TestGraphQlCommonWithoutIntrospection):
             "key": "odoo_graphql.introspection",
             "value": "True",
         })
-
