@@ -72,7 +72,7 @@ self.assertTrue(value)
       ...
   ```
 
-  
+
 
 ## Bugs found
 
@@ -88,4 +88,3 @@ export ODOO_HTTP_SOCKET_TIMEOUT=120
 ```
 
 Nb: Setting this value to an higher value than the default increase a risk of DoS attack.
-

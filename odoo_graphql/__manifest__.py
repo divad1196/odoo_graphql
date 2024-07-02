@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 {
     "name": "Odoo GraphQL",
     "version": "2.0",
