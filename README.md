@@ -1,4 +1,13 @@
-# README
+# Status: Still maintained
+This repository is still **MAINTAINED** even though no commits are being made to it.
+This is because the repository is **STABLE** and is only getting modified if:
+- A bug is found
+- A feature **request** is **approved** (after being proposed in an issue or a github discussion)  
+NOTE: Changes are following Odoo' support policy, i.e. the last 3 versions will benefit from the bug fixes and features addition.
+
+I will also ensure that it gets migrated to all next Odoo versions.
+
+# Graphql
 
 Graphql provides a simplier and more efficient way to query data than you would currently do in Odoo (using for example xmlrpc or jsonrpc).
 
