@@ -13,3 +13,9 @@ class TestApollo(http.Controller):
     )
     def test_apollo(self):
         return request.render("odoo_graphql_test.test-graphql")
+
+    @http.route(
+        "/graphql/test-modules/sse", type="http", website=True, sitemap=False
+    )
+    def test_sse(self):
+        return request.render("odoo_graphql_test.test-sse")

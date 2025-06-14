@@ -47,6 +47,16 @@ INT = {
     "possibleTypes": None,
 }
 
+IDS = {
+    "kind": "LIST",
+    "name": None,
+    "ofType": {
+        "kind": "SCALAR",
+        "name": ID["name"],
+        "ofType": None,
+    }
+}
+
 ANY = {
     "kind": "SCALAR",
     "name": "_Any",
@@ -874,6 +884,7 @@ ALL_TYPES_MAPPING = {
     "BOOLEAN": BOOLEAN,
     "STRING": STRING,
     "ID": ID,
+    # "IDS": IDS,
     "INT": INT,
     "ANY": ANY,
     "SERVICE": SERVICE,

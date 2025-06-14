@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="test-sse" name="Test Graphql">
+        <t t-call="web.layout">
+            <script defer="">
+                function test_sse() {
+                    let evtSource = new EventSource("/graphql");
+
+
+                    let events = [];
+                    evtSource.onmessage = (event) => {
+                        console.log(event.data);
+                        console.log(`message: ${event.data}`);
+                        events.push(event.data)
+                    };
+                    return events;
+                }
+
+                test_sse()
+            </script>
+        </t>
+    </template>
+</odoo>

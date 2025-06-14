@@ -4,7 +4,7 @@
 # https://github.com/graphql-python/graphql-core
 from odoo.exceptions import ValidationError
 
-from .graphql_definitions.basic_types import ALL_TYPES
+from .graphql_definitions.basic_types import ALL_TYPES, INT, IDS
 from .graphql_definitions.directives import DIRECTIVES
 from .graphql_definitions.field_args import DATE_FORMAT, DATETIME_TZ, MODELS_ARGS
 from .utils import lazy, model2name, resolve_data
@@ -121,13 +121,18 @@ def get_field_args(relational=True, field=None):
     return MODELS_ARGS
 
 
-def get_field_type_data(field):
+def get_field_type_data(field, is_relational=False, is_mutation=False):
     if field.relational:
-        return {
-            "kind": "OBJECT",
-            "name": model2name(field.comodel_name),
-            "ofType": None,
-        }
+        type_data = INT
+        if not is_mutation:
+            type_data = {
+                "kind": "OBJECT",
+                "name": model2name(field.comodel_name),
+                "ofType": None,
+            }
+        if is_relational:
+            type_data = {"kind": "LIST", "name": None, "ofType": type_data}
+        return type_data
     return {
         "kind": "SCALAR",
         "name": FIELDTYPE_TO_KIND.get(field.type, "_Any"),
@@ -135,15 +140,13 @@ def get_field_type_data(field):
     }
 
 
-def field2type(field, node=None):
+def field2type(field, node=None, is_mutation=False):
     """
     Convert a model to a graphql __Type
     https://docs.cleverbridge.com/api-documentation/graphql-api/doc/schema/type.spec.html
     """
-    type_data = get_field_type_data(field)
-    relational = field.type in ("one2many", "many2many")
-    if relational:
-        type_data = {"kind": "LIST", "name": None, "ofType": type_data}
+    is_relational = field.type in ("one2many", "many2many")
+    type_data = get_field_type_data(field, is_relational=is_relational, is_mutation=is_mutation)
     if field.required:
         type_data = {"kind": "NON_NULL", "name": None, "ofType": type_data}
     return resolve_data(
@@ -151,25 +154,13 @@ def field2type(field, node=None):
         {
             "name": field.name,
             "description": field.string or field.name,
-            "args": get_field_args(relational, field),
+            "args": get_field_args(is_relational, field),
             "type": type_data,
         },
     )
 
-
-# https://docs.cleverbridge.com/api-documentation/graphql-api/doc/schema/schema.spec.html
-def handle_schema(env, model_mapping, field, fragments={}):
-    # TODO: Re-add the possibility to hide transient models
-    models = list(env.values())
-    # models = [
-    #     model
-    #     for model in env.values()
-    #     if not model._transient
-    # ]
-    models_types = [model2type(model) for model in models]
-    models_types = [t for t in models_types if t["fields"]]
-    # TODO: Remove fields that reference types that where removed?
-    query_type = {
+def get_schema_type_definition(models_types):
+    return {
         "kind": "OBJECT",
         "name": "Query",
         "description": None,
@@ -191,6 +182,20 @@ def handle_schema(env, model_mapping, field, fragments={}):
         "enumValues": None,
         "possibleTypes": None,
     }
+
+# https://docs.cleverbridge.com/api-documentation/graphql-api/doc/schema/schema.spec.html
+def handle_schema(env, model_mapping, field, fragments={}):
+    # TODO: Re-add the possibility to hide transient models
+    models = list(env.values())
+    # models = [
+    #     model
+    #     for model in env.values()
+    #     if not model._transient
+    # ]
+    models_types = [model2type(model) for model in models]
+    models_types = [t for t in models_types if t["fields"]]
+    # TODO: Remove fields that reference types that where removed?
+    query_type = get_schema_type_definition(models_types) 
     types = [*ALL_TYPES, query_type, *models_types]
     return {
         "directives": DIRECTIVES,

@@ -9,6 +9,7 @@
     "depends": ["product", "odoo_graphql"],
     "data": [
         "templates/interface.xml",
+        "templates/sse.xml",
     ],
     "installable": True,
     "auto_install": False,
