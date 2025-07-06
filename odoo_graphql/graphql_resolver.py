@@ -259,8 +259,6 @@ def parse_definition(
         fragments,
         introspection=introspection,
     )
-    _logger.critical("This is a subscription !!")
-    _logger.critical(data)
     if not subscription:
         check_for_changes_functions = None
     return data, check_for_changes_functions

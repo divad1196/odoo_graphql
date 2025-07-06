@@ -131,11 +131,8 @@ class GraphQL(http.Controller):
         # query = request.httprequest.data.decode()  # request.graphqlrequest
         with suppress(Exception):
             query = b64decode(query).decode()
-        print(query)
-        _logger.critical(query)
         now = datetime.now()
         response, check_for_changes_functions = request.env["graphql.handler"].handle_query_with_checks(query)
-        _logger.critical(f"Initial 'check_for_changes_functions': {check_for_changes_functions}")
         if check_for_changes_functions is None:
             return to_sse_stream([response])
         
@@ -161,7 +158,6 @@ class GraphQL(http.Controller):
                         continue
                     now = datetime.now()
                     response, check_for_changes_functions = env["graphql.handler"].handle_query_with_checks(query)
-                    _logger.critical(f"Returned 'check_for_changes_functions': {check_for_changes_functions}")
                     yield response
                 
         return to_sse_stream(stream())
