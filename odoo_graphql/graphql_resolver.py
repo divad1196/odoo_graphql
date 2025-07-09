@@ -80,11 +80,12 @@ def handle_graphql(
     field_mapping={},
     allowed_fields={},
     introspection=False,
-    debug=False,
+    debug=True,
 ):
     response = {}
+    check_for_changes_functions = []
     try:
-        data = parse_document(
+        data, check_for_changes_functions = parse_document(
             env,
             doc,
             model_mapping,
@@ -96,13 +97,13 @@ def handle_graphql(
         )
         response["data"] = data
     except Exception as e:
-        _logger.critical(e)
         response["data"] = None
         message = str(e)
         if debug:
             message += traceback.format_exc()
+        _logger.error(message)
         response["errors"] = {"message": message}
-    return response
+    return response, check_for_changes_functions
 
 
 def parse_document(
@@ -190,6 +191,7 @@ def _parse_definition(
     Process the definition recursively
     """
     data = {}
+    check_for_changes_functions = None
     for field in definition.selection_set.selections:
         fname = field.alias and field.alias.value or field.name.value
         if introspection:
@@ -205,7 +207,7 @@ def _parse_definition(
         ctx = parse_context_directives(definition)
         if ctx:
             model = model.with_context(**ctx)
-        data[fname], _ = parse_model_field(
+        data[fname], _, check_for_changes_functions = parse_model_field(
             model,
             field,
             variables,
@@ -218,7 +220,7 @@ def _parse_definition(
             # Therefore, we cannot apply the limit/offset on the batch queries
             do_limit_offset=True,
         )
-    return data
+    return data, check_for_changes_functions
 
 
 def parse_definition(
@@ -240,12 +242,13 @@ def parse_definition(
     if allowed_fields is None:
         allowed_fields = {}
     dtype = definition.operation.value  # MUTATION OR QUERY
-    if dtype not in ("query", "mutation"):  # does not support other types currently
-        return None
+    if dtype not in ("query", "mutation", "subscription"):  # does not support other types currently
+        return None, None
 
     filter_by_directives(definition, variables)
     mutation = dtype == "mutation"
-    return _parse_definition(
+    subscription = dtype == "subscription"
+    data, check_for_changes_functions = _parse_definition(
         env,
         definition,
         model_mapping,
@@ -256,6 +259,9 @@ def parse_definition(
         fragments,
         introspection=introspection,
     )
+    if not subscription:
+        check_for_changes_functions = None
+    return data, check_for_changes_functions
 
 
 def slice_result(res, limit=None, offset=None):
@@ -297,7 +303,7 @@ def inner_subgather(ids, data, limit, offset):
 
 
 def relation_subgathers(
-    records, relational_data, variables, field_mapping={}, fragments={}
+    records, relational_data, variables, field_mapping={}, fragments={}, check_for_changes_functions=None
 ):
     """
     Retrieve nested data for relational fields
@@ -307,13 +313,14 @@ def relation_subgathers(
     through the corresponding records
     """
     subgathers = {}
+    check_for_changes_functions = check_for_changes_functions or []
     for submodel, fname, fields in relational_data:
         sub_records_ids = records.mapped(fname).ids
         aliases = []
         for f in fields:
             # Nb: Even if its the same field, the domain may change
             alias = f.alias and f.alias.value or f.name.value
-            tmp, (limit, offset) = parse_model_field(
+            tmp, (limit, offset), sub_check_for_changes_functions = parse_model_field(
                 submodel,
                 f,
                 variables,
@@ -321,6 +328,7 @@ def relation_subgathers(
                 field_mapping=field_mapping,
                 fragments=fragments,
             )
+            check_for_changes_functions.extend(sub_check_for_changes_functions)
             if not tmp:
                 aliases.append((alias, default_empty_subgather))
                 continue
@@ -334,7 +342,7 @@ def relation_subgathers(
             aliases.append((alias, subgather))
 
         subgathers[fname] = aliases
-    return subgathers
+    return subgathers, check_for_changes_functions
 
 
 def make_domain(domain, ids):
@@ -399,13 +407,44 @@ def retrieve_records(
     if do_limit_offset:
         extra_search_args = kwargs
     domain = make_domain(domain or [], ids)
+    
     records = model.search(domain, **extra_search_args)
+    model_name = model._name
+    retrieved_record_ids = set(records.ids)
+
+
+    def check_for_changes(env, now):
+        """
+            This function checks if there has been any changes on the retrieved records
+            Since the last execution
+        """
+        model = env[model_name]
+        # 1. Check if the ids are the same (best method to detect creation, deletion, change of order, ...)
+        # records = model.search_read(domain, **extra_search_args)
+        records = model.search(domain, **extra_search_args)
+
+        if set(records.ids) != retrieved_record_ids:
+            return True
+        
+        # 2. Check if any of the records have been updated since last time
+        records = model.search(
+            AND([
+                [("write_date", ">", now)],
+                domain,
+            ]),
+            **extra_search_args
+        )
+        if records:
+            return True
+        return False
+
+
 
     # Write is requested (mutation with domain provided)
     if mutation:
         records.write(vals)
 
-    return records, search_args
+    return records, search_args, check_for_changes
 
 
 def args2dict(args, variables=None):
@@ -524,6 +563,7 @@ def parse_model_field(  # noqa C901
     allowed_fields=None,
     fragments={},
     do_limit_offset=False,
+    check_for_changes_functions=None
 ):
     """
     Nb: This function is (indirectly) recursive.
@@ -539,7 +579,8 @@ def parse_model_field(  # noqa C901
         variables = {}
     if allowed_fields is None:
         allowed_fields = {}
-    records, search_args = retrieve_records(
+    check_for_changes_functions = check_for_changes_functions or []
+    records, search_args, check_for_changes = retrieve_records(
         model,
         field,
         variables=variables,
@@ -547,9 +588,10 @@ def parse_model_field(  # noqa C901
         mutation=mutation,
         do_limit_offset=do_limit_offset,
     )
+    check_for_changes_functions.append(check_for_changes)
     # Short-circuit the whole code
     if not records:
-        return [], search_args
+        return [], search_args, check_for_changes_functions
     model_name = model._name
 
     # User may have forgotten to define subfields
@@ -572,20 +614,21 @@ def parse_model_field(  # noqa C901
     if allowed is not None:
         fields = [f for f in fields if f.name.value in allowed]
         if not fields:
-            return [{"id": rid} for rid in records.ids], search_args
+            return [{"id": rid} for rid in records.ids], search_args, check_for_changes_functions
     all_fields_names = {f.name.value for f in fields}
     reserved_fields_name = all_fields_names & GRAPHQL_RESERVED_FIELDS
     fields_names = list(all_fields_names - reserved_fields_name)
 
     # Get datas
     relational_data, fields_data = get_fields_data(model, fields)
-    subgathers = relation_subgathers(
+    subgathers, sub_check_for_changes_functions = relation_subgathers(
         records,
         relational_data,
         variables,
         field_mapping=field_mapping,
         fragments=fragments,
     )
+    check_for_changes_functions.extend(sub_check_for_changes_functions)
     records = records.read(fields_names, load=False)
 
     if "__typename" in reserved_fields_name:
@@ -617,7 +660,7 @@ def parse_model_field(  # noqa C901
     for name, ser in serializers:
         for d in data:
             d[name] = ser(d[name])
-    return data, search_args
+    return data, search_args, check_for_changes_functions
 
 
 def get_fields_data(model, fields):

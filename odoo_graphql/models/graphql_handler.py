@@ -24,6 +24,14 @@ class GraphQLHandler(models.TransientModel):
         return introspection == "true"
 
     def handle_query(self, query):
+        response, _ = self._handle_query(query)
+        return response
+    
+    def handle_query_with_checks(self, query):
+        response, check_for_changes_functions = self._handle_query(query)
+        return response, check_for_changes_functions
+    
+    def _handle_query(self, query):
         if isinstance(query, bytes):
             query = query.decode()
         variables = {}
@@ -33,27 +41,6 @@ class GraphQLHandler(models.TransientModel):
             query = data["query"]
             variables = data.get("variables", {})
             operation = data.get("operationName")
-            # An error when authenticating must be sent back
-            try:
-                auth = data.get("auth", {})
-                if not auth:
-                    auth = request.httprequest.authorization
-                if auth:
-                    login = auth.get("login")
-                    if not login:
-                        login = auth.get("username")
-                    password = auth.get("password")
-                    if login and password:
-                        uid = exp_login(
-                            self.env.cr.dbname,
-                            login,
-                            password,
-                        )
-                        self = self.with_user(uid)
-            except Exception as e:
-                return {
-                    "errors": {"message": str(e)}  # + traceback.format_exc()
-                }
         except Exception:  # We may have pure graphql query
             _logger.debug("Pure graphql query received")
         return self.handle_graphql(
