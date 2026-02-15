@@ -8,6 +8,7 @@
     "summary": "This test the odoo_graphql module. It install other module for the tests that must not be added to the main module",
     "depends": ["product", "odoo_graphql"],
     "data": [
+        'security/ir.model.access.csv',
         "templates/interface.xml",
     ],
     "installable": True,

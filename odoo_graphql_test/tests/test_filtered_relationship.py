@@ -2,7 +2,7 @@
 
 from .common import TestGraphQlCommon
 from .utils import firstMatching, get_query
-from odoo.osv import expression
+from odoo.fields import Domain
 
 
 # TODO: Fix this test
@@ -26,7 +26,7 @@ class TestFilteredRelationship(TestGraphQlCommon):
 
 
         res = firstMatching(
-            self.handle_query(query, variables={"domain": [expression.FALSE_LEAF]})["data"][
+            self.handle_query(query, variables={"domain": Domain.FALSE})["data"][
                 "ResPartner"
             ],
             lambda p: p["id"] == partner.id,

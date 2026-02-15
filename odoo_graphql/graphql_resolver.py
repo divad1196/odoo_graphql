@@ -15,7 +15,7 @@ from graphql.language.ast import (
     VariableNode,
 )
 from odoo.exceptions import ValidationError
-from odoo.osv.expression import AND
+from odoo.fields import Domain
 
 from .graphql_definitions.utils import timezones
 from .introspection import handle_introspection
@@ -344,9 +344,9 @@ def make_domain(domain, ids):
     """
     if ids:
         if isinstance(ids, (list, tuple)):
-            domain = AND([[("id", "in", ids)], domain])
+            domain = Domain.AND([[("id", "in", ids)], domain])
         elif isinstance(ids, int):
-            domain = AND([[("id", "=", ids)], domain])
+            domain = Domain.AND([[("id", "=", ids)], domain])
     return domain
 
 

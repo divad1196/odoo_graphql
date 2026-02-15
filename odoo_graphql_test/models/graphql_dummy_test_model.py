@@ -9,6 +9,7 @@ _logger = logging.getLogger(__name__)
 
 class GraphQLDummyDefaultTestModel(models.Model):
     _name = "graphql.dummy.default.test.model"
+    _description = "Dummy model for testing GraphQL module"
 
     date = fields.Date()
     datetime = fields.Datetime()

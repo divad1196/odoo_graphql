@@ -1,7 +1,5 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.osv import expression
-
 from .common import TestGraphQlCommon
 from .utils import contains, firstMatching, get_query, open_query
 

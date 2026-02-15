@@ -13,6 +13,7 @@ _logger = logging.getLogger(__name__)
 
 class GraphQLHandler(models.TransientModel):
     _name = "graphql.handler"
+    _description = "TransientModel in charge of handling GraphQL requests"
 
     def has_introspection(self):
         introspection = (

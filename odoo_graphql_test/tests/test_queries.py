@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo.osv import expression
+from odoo.fields import Domain
 
 from .common import TestGraphQlCommon
 from .utils import contains, firstMatching, get_query, open_query
@@ -88,7 +88,7 @@ class TestName(TestGraphQlCommon):
         )
         assert res["category_id"]
         res = firstMatching(
-            self.handle_query(query, variables={"domain": expression.FALSE_DOMAIN})[
+            self.handle_query(query, variables={"domain": Domain.FALSE})[
                 "data"
             ]["ResPartner"],
             lambda p: p["id"] == partner.id,
